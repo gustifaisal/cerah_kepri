@@ -15,12 +15,13 @@ use Throwable;
  */
 class SyncRecentDaily extends Command
 {
-    protected $signature = 'climate:sync-recent {--region= : Hanya satu kode wilayah untuk uji coba}';
+    protected $signature = 'climate:sync-recent {--region= : Hanya satu kode wilayah untuk uji coba} {--days=30 : Jumlah hari ke belakang yang ditambal (maks. 92)}';
     protected $description = 'Lengkapi data harian sampai hari ini dengan model terbaru Open-Meteo';
 
     public function handle(): int
     {
         $today = Carbon::today('Asia/Jakarta')->toDateString();
+        $pastDays = max(1, min(92, (int) $this->option('days')));
         $scope = trim((string) $this->option('region'));
         $query = DB::table('regions')->where('active', true)->orderBy('code');
         if ($scope !== '') {
@@ -45,8 +46,9 @@ class SyncRecentDaily extends Command
                         ->get('https://api.open-meteo.com/v1/forecast', [
                             'latitude' => $batch->pluck('latitude')->implode(','),
                             'longitude' => $batch->pluck('longitude')->implode(','),
-                            'past_days' => 7,
+                            'past_days' => $pastDays,
                             'forecast_days' => 1,
+                            'hourly' => 'precipitation',
                             'daily' => 'precipitation_sum,temperature_2m_mean,temperature_2m_max,temperature_2m_min,weather_code,relative_humidity_2m_mean',
                             'timezone' => 'Asia/Jakarta',
                         ]);
@@ -62,12 +64,22 @@ class SyncRecentDaily extends Command
                     // Cegah mengubah data reanalisis ERA5 yang lebih berkualitas historis.
                     $existing = DB::table('climate_daily_summaries')
                         ->whereIn('region_code', $batch->pluck('code')->all())
-                        ->whereBetween('observed_on', [Carbon::parse($today)->subDays(7)->toDateString(), $today])
+                        ->whereBetween('observed_on', [Carbon::parse($today)->subDays($pastDays)->toDateString(), $today])
                         ->get(['region_code', 'observed_on', 'source'])
                         ->keyBy(fn ($item) => $item->region_code.'|'.$item->observed_on);
                     $rows = [];
+                    $peakUpdates = [];
+                    $nowKey = Carbon::now('Asia/Jakarta')->format('Y-m-d\TH:i');
                     foreach ($batchValues as $idx => $region) {
                         $daily = $locations[$idx]['daily'] ?? [];
+                        // Curah hujan per jam tertinggi per hari (untuk hari ini hanya jam yang sudah lewat).
+                        $peaks = [];
+                        foreach (($locations[$idx]['hourly']['time'] ?? []) as $h => $hourTime) {
+                            $value = $locations[$idx]['hourly']['precipitation'][$h] ?? null;
+                            if ($value === null || $hourTime > $nowKey) continue;
+                            $day = substr($hourTime, 0, 10);
+                            $peaks[$day] = max($peaks[$day] ?? 0, (float) $value);
+                        }
                         if (empty($daily['time']) || ! is_array($daily['time'])) {
                             $failed++;
                             $this->warn($region->code.' : data harian API kosong.');
@@ -78,6 +90,9 @@ class SyncRecentDaily extends Command
                             if ($date > $today) continue;
                             $prior = $existing->get($region->code.'|'.$date);
                             if ($prior && str_contains((string) $prior->source, 'era5')) {
+                                if (isset($peaks[$date])) {
+                                    $peakUpdates[$region->code][$date] = $peaks[$date];
+                                }
                                 $regionSucceeded = true;
                                 continue;
                             }
@@ -94,6 +109,7 @@ class SyncRecentDaily extends Command
                                 'weather_code' => $daily['weather_code'][$i] ?? null,
                                 'relative_humidity_mean' => isset($daily['relative_humidity_2m_mean'][$i])
                                     ? (int) round((float) $daily['relative_humidity_2m_mean'][$i]) : null,
+                                'precipitation_max_hourly_mm' => $peaks[$date] ?? null,
                                 'source' => $source,
                                 'created_at' => now(),
                                 'updated_at' => now(),
@@ -110,10 +126,21 @@ class SyncRecentDaily extends Command
                         foreach (array_chunk($rows, 500) as $chunk) {
                             DB::table('climate_daily_summaries')->upsert($chunk, ['region_code', 'observed_on'], [
                                 'precipitation_mm', 'temperature_mean_c', 'temperature_max_c', 'temperature_min_c',
-                                'weather_code', 'relative_humidity_mean', 'source', 'updated_at',
+                                'weather_code', 'relative_humidity_mean', 'precipitation_max_hourly_mm', 'source', 'updated_at',
                             ]);
                             $written += count($chunk);
                         }
+                    }
+                    // Baris ERA5 tidak ditimpa; hanya kolom puncak hujan per jam yang diisi.
+                    foreach ($peakUpdates as $code => $dates) {
+                        $values = [];
+                        $bindings = [];
+                        foreach ($dates as $date => $peak) {
+                            $values[] = '(?::date, ?::numeric)';
+                            array_push($bindings, $date, $peak);
+                        }
+                        $bindings[] = $code;
+                        DB::update('UPDATE climate_daily_summaries AS c SET precipitation_max_hourly_mm = v.peak FROM (VALUES '.implode(',', $values).') AS v(d, peak) WHERE c.region_code = ? AND c.observed_on = v.d', $bindings);
                     }
                     $this->info('Batch '.($batchNumber + 1).': '.$batch->count().' wilayah diproses; '.$written.' baris telah ditulis.');
                 } catch (Throwable $e) {

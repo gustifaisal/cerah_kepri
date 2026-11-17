@@ -11,7 +11,7 @@ use Throwable;
 
 class SyncWeather extends Command
 {
-    protected $signature = 'weather:sync {--region= : Sinkronkan satu wilayah berdasarkan kode wilayah}';
+    protected $signature = 'weather:sync {--region= : Sinkronkan satu wilayah berdasarkan kode wilayah} {--missing : Hanya wilayah yang belum punya data cuaca terkini}';
     protected $description = 'Ambil kondisi cuaca dan prakiraan Open-Meteo untuk seluruh atau satu wilayah Kepulauan Riau';
 
     public function handle(): int
@@ -22,6 +22,15 @@ class SyncWeather extends Command
             $this->error("Wilayah aktif dengan kode {$regionCode} tidak ditemukan.");
 
             return self::FAILURE;
+        }
+
+        // Jadwal --missing berjalan tiap jam; jangan catat log kosong bila semua wilayah sudah terisi.
+        if ($regionCode === null && $this->option('missing')
+            && ! DB::table('regions')->where('active', true)
+                ->whereNotIn('code', DB::table('weather_observations')->where('kind', 'current')->select('region_code'))->exists()) {
+            $this->info('Semua wilayah aktif sudah punya data cuaca terkini.');
+
+            return self::SUCCESS;
         }
 
         $failed = false;
@@ -57,7 +66,15 @@ class SyncWeather extends Command
         if ($regionCode !== null) {
             $regionsQuery->where('code', $regionCode);
         }
+        if ($this->option('missing')) {
+            $regionsQuery->whereNotIn('code', DB::table('weather_observations')->where('kind', 'current')->select('region_code'));
+        }
         $regions = $regionsQuery->get();
+        if ($regions->isEmpty() && $this->option('missing')) {
+            $this->info('Semua wilayah aktif sudah punya data cuaca terkini.');
+
+            return ['processed' => 0, 'succeeded' => 0, 'failed' => 0, 'written' => 0];
+        }
         if ($regions->isEmpty()) {
             throw new \RuntimeException('Belum ada wilayah aktif. Jalankan seeder wilayah Kepulauan Riau terlebih dahulu.');
         }
@@ -73,8 +90,11 @@ class SyncWeather extends Command
         // Keep requests spread out. The free Open-Meteo limit is applied by IP,
         // so a second manual/scheduled run can otherwise exhaust it quickly.
         $batches = $regions->chunk(10);
+        $okCodes = [];
+        $failedRegions = 0;
 
         foreach ($batches as $batchIndex => $batch) {
+            try {
             $latitude = $batch->pluck('latitude')->implode(',');
             $longitude = $batch->pluck('longitude')->implode(',');
             $weatherPayload = $this->openMeteoGet('https://api.open-meteo.com/v1/forecast', [
@@ -88,11 +108,14 @@ class SyncWeather extends Command
                 'daily' => 'sunrise,sunset',
                 'forecast_days' => 7,
                 'forecast_hours' => 168,
+                'past_hours' => 24, // hujan 24 jam terakhir (jam yang sudah lewat disimpan sebagai kind 'past')
                 'timezone' => 'Asia/Jakarta',
                 'wind_speed_unit' => 'kmh',
             ], $regionCode === null);
-            // Avoid sending the weather and air-quality requests back-to-back.
-            sleep(2);
+            // Avoid sending the weather and air-quality requests back-to-back (hanya untuk sinkron massal).
+            if ($regionCode === null) {
+                sleep(2);
+            }
             $airPayload = $this->openMeteoGet('https://air-quality-api.open-meteo.com/v1/air-quality', [
                 'latitude' => $latitude,
                 'longitude' => $longitude,
@@ -137,7 +160,9 @@ class SyncWeather extends Command
                     $forecastDailyIndex = array_search($date, $daily['time'] ?? [], true);
                     $hour['sunrise'] = $forecastDailyIndex === false ? null : ($daily['sunrise'][$forecastDailyIndex] ?? null);
                     $hour['sunset'] = $forecastDailyIndex === false ? null : ($daily['sunset'][$forecastDailyIndex] ?? null);
-                    $rows[] = $this->weatherRow($region->code, 'forecast', $time, $fetchedAt, $hour);
+                    // Jam yang sudah lewat (sebelum jam berjalan) disimpan terpisah agar tidak masuk tabel prakiraan.
+                    $kind = $time < substr($current['time'], 0, 13).':00' ? 'past' : 'forecast';
+                    $rows[] = $this->weatherRow($region->code, $kind, $time, $fetchedAt, $hour);
                 }
             }
 
@@ -145,22 +170,36 @@ class SyncWeather extends Command
                 DB::table('weather_observations')->insert($chunk);
             }
             $written += count($rows);
+            array_push($okCodes, ...$batch->pluck('code')->all());
             $this->line('Kelompok '.($batchIndex + 1).'/'.$batches->count().': '.$batch->count().' wilayah diproses.');
+            } catch (Throwable $exception) {
+                // Satu kelompok gagal tidak boleh menghentikan wilayah lain.
+                $failedRegions += $batch->count();
+                $this->warn('Kelompok '.($batchIndex + 1).' gagal: '.$exception->getMessage());
+                report($exception);
+                if (str_contains($exception->getMessage(), '429')) {
+                    $this->warn('Batas API tercapai; sisa wilayah dilewati. Jalankan weather:sync --missing nanti.');
+                    break;
+                }
+            }
 
             if ($batchIndex + 1 < $batches->count()) {
                 sleep(3);
             }
         }
 
+        if ($okCodes === []) {
+            throw new \RuntimeException('Tidak ada wilayah yang berhasil diperbarui dari Open-Meteo.');
+        }
+
         // The page only reads the latest forecast run. Keep current observations
         // for the requested one-day history, but discard superseded 7-day runs.
-        $oldForecasts = DB::table('weather_observations')->where('kind', 'forecast')->where('fetched_at', '<', $fetchedAt);
-        if ($regionCode !== null) {
-            $oldForecasts->where('region_code', $regionCode);
+        // Hanya wilayah yang berhasil diperbarui; wilayah gagal tetap memakai prakiraan lamanya.
+        foreach (array_chunk($okCodes, 500) as $codes) {
+            DB::table('weather_observations')->whereIn('kind', ['forecast', 'past'])->where('fetched_at', '<', $fetchedAt)->whereIn('region_code', $codes)->delete();
         }
-        $oldForecasts->delete();
 
-        return ['processed' => $regions->count(), 'succeeded' => $regions->count(), 'failed' => 0, 'written' => $written];
+        return ['processed' => $regions->count(), 'succeeded' => count($okCodes), 'failed' => $regions->count() - count($okCodes), 'written' => $written];
     }
 
     private function normalizeLocations(array $payload, int $expected): array
@@ -180,11 +219,13 @@ class SyncWeather extends Command
      */
     private function openMeteoGet(string $url, array $query, bool $retryRateLimit = true): array
     {
-        $maxAttempts = 5;
+        // Sinkron satu wilayah (tombol segarkan / halaman dibuka) harus cepat gagal, bukan menunggu berbelas menit.
+        $maxAttempts = $retryRateLimit ? 5 : 2;
+        $timeout = $retryRateLimit ? 90 : 20;
 
         for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
             try {
-                $response = Http::acceptJson()->timeout(90)->get($url, $query);
+                $response = Http::acceptJson()->connectTimeout(8)->timeout($timeout)->get($url, $query);
             } catch (Throwable $exception) {
                 if ($attempt === $maxAttempts) {
                     throw $exception;
@@ -259,7 +300,8 @@ class SyncWeather extends Command
             'wind_direction_deg' => $data['wind_direction_10m'] ?? null,
             'weather_code' => $data['weather_code'] ?? null,
             'is_day' => isset($data['is_day']) ? (bool) $data['is_day'] : null,
-            'rain_mm' => $data['rain'] ?? $data['precipitation'] ?? null,
+            // 'precipitation' = total (hujan + hujan lokal/shower); 'rain' saja mengecualikan hujan lokal ringan.
+            'rain_mm' => $data['precipitation'] ?? $data['rain'] ?? null,
             'precipitation_probability' => $data['precipitation_probability'] ?? null,
             'visibility_m' => $data['visibility'] ?? null,
             'pm2_5_ug_m3' => $data['pm2_5'] ?? null,

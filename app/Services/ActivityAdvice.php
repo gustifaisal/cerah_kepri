@@ -114,7 +114,7 @@ class ActivityAdvice
             $agricultureMessage,
             $this->joinReasons([
                 'peluang hujan maks. '.$chance.'%',
-                'akumulasi hujan 24 jam '.number_format($rainTotal, 1, ',', '.').' mm',
+                'akumulasi hujan 4 jam ke depan '.number_format($rainTotal, 1, ',', '.').' mm',
                 'hujan per jam maks. '.number_format($maxHourlyRain, 1, ',', '.').' mm',
                 $soilMoisture === null ? 'kelembapan tanah belum tersedia' : 'kelembapan tanah lapisan atas '.number_format($soilMoisture * 100, 0, ',', '.').'%',
                 $temperature === null ? null : 'suhu '.number_format($temperature, 1, ',', '.').'°C',

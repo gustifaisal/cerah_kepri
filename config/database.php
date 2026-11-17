@@ -97,6 +97,9 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
+            // Waktu cuaca disimpan sebagai jam WIB tanpa offset; sesi PostgreSQL harus WIB
+            // (server hosting biasanya UTC sehingga jam bergeser 7 jam).
+            'timezone' => env('DB_TIMEZONE', 'Asia/Jakarta'),
         ],
 
         'sqlsrv' => [

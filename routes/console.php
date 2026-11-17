@@ -36,9 +36,16 @@ Schedule::command('climate:sync-recent')
     ->withoutOverlapping(180);
 
 // Data peta memakai weather_observations, bukan climate_daily_summaries.
-// Dijalankan sekali sehari untuk semua wilayah (507 lokasi),
-// agar tidak membebani API. Laptop, koneksi internet, dan PostgreSQL harus aktif.
+// Dijalankan tiap 6 jam (00, 06, 12, 18 WIB) untuk semua wilayah (507 lokasi).
+// Tiap proses memakai ±1.000–2.000 panggilan Open-Meteo; 4x/hari masih aman di bawah batas gratis (10.000/hari).
+// Laptop, koneksi internet, dan PostgreSQL harus aktif.
 Schedule::command('weather:sync')
-    ->dailyAt('00:00')
+    ->cron('0 */6 * * *')
     ->timezone('Asia/Jakarta')
     ->withoutOverlapping(240);
+
+// Menambal wilayah yang belum punya data cuaca (mis. sinkron penuh terhenti karena limit API).
+Schedule::command('weather:sync --missing')
+    ->hourly()
+    ->timezone('Asia/Jakarta')
+    ->withoutOverlapping(60);

@@ -1,11 +1,17 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+<!-- Ikon tab CERAH -->
+<link rel="icon" type="image/x-icon" href="/favicon.ico?v=cerah-20261117">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=cerah-20261117">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=cerah-20261117">
+
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#f4f7f5">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Cuaca Kepulauan Riau — Cerah</title>
+    <title>Prakiraan Cuaca Kepulauan Riau | CERAH</title>
+    <meta name="description" content="Informasi prakiraan cuaca, peta wilayah, dan riwayat iklim Kepulauan Riau di CERAH.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -53,6 +59,34 @@
         .history-only[hidden]{display:none!important}
         #map-section{display:none!important}.shell.map-page{display:flex;height:100dvh;min-height:0;max-width:none;flex-direction:column;overflow:hidden;padding:0}.shell.map-page .topbar{flex:0 0 auto;padding:0 24px}.shell.map-page .page{display:flex;flex:1;min-height:0;height:auto;padding:10px 16px 14px}.shell.map-page .page>:not(#map-section){display:none!important}.shell.map-page #map-section{display:flex!important;flex:1;min-height:0;flex-direction:column;margin:0}.shell.map-page #map-section>.section-head{flex:0 0 auto;margin-bottom:8px}.shell.map-page .map-panel{display:flex;flex:1;min-height:0;flex-direction:column;padding:10px}.shell.map-page #weather-map{height:auto;min-height:0;flex:1}.shell.map-page .footer{display:none}.map-popup-title-button{padding:0;border:0;background:transparent;color:#173956;font:800 15px/1.3 'Plus Jakarta Sans',sans-serif;text-align:left;cursor:pointer}.map-popup-title-button:hover{color:#2476bd;text-decoration:underline}@media(max-width:640px){.shell.map-page .topbar{height:auto;min-height:68px;padding:6px 12px;gap:8px}.shell.map-page .page{padding:8px}.shell.map-page #map-section>.section-head{align-items:center}.shell.map-page #map-section .section-title{font-size:16px}.shell.map-page .map-panel{padding:6px}.shell.map-page #weather-map{min-height:0}}
         .map-body{display:grid;grid-template-columns:218px minmax(0,1fr);gap:12px;height:410px;min-height:0}.map-region-sidebar{min-width:0;overflow:auto;padding:12px;border:1px solid #e3ebf1;border-radius:15px;background:#f8fafc}.map-region-sidebar h3{margin:1px 0 9px;color:#38536b;font-size:12px;font-weight:800}.map-region-list{display:grid;gap:5px}.map-region-option{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;border:1px solid transparent;border-radius:10px;background:transparent;color:#48647b;font:600 11px 'Plus Jakarta Sans',sans-serif;text-align:left;cursor:pointer}.map-region-option:hover{background:#eef5fa}.map-region-option[aria-current="true"]{border-color:#b8d5e9;background:#eaf5fc;color:#18578a;font-weight:800}.map-region-option span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.map-region-option small{flex:0 0 auto;color:#8294a4;font-size:9px;font-weight:600}.map-canvas{position:relative;min-width:0;min-height:0;overflow:hidden;border-radius:15px}.map-canvas #weather-map{height:100%;min-height:0}.map-canvas .map-up-button{top:22px;left:12px}.map-actions{position:absolute;z-index:500;top:22px;right:22px;display:flex;align-items:center;gap:10px}.map-actions .map-refresh-button,.map-actions .map-fullscreen-button{position:static;white-space:nowrap}.map-canvas .leaflet-control-zoom{margin:12px}.map-panel:fullscreen .map-body{flex:1;height:auto;min-height:0}.map-panel:fullscreen .map-canvas{flex:1}.map-panel:fullscreen .map-canvas #weather-map{height:100%;min-height:0}.map-panel:fullscreen .map-canvas .map-actions,.map-panel:fullscreen .map-canvas .map-up-button{top:24px}.shell.map-page .map-body{flex:1;height:auto;min-height:0}.shell.map-page .map-canvas{height:100%}.shell.map-page .map-canvas #weather-map{height:100%;min-height:0;flex:initial}@media(max-width:640px){.map-body{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(260px,1fr);height:470px;gap:8px}.map-region-sidebar{max-height:104px;padding:8px 9px}.map-region-sidebar h3{margin:0 0 5px;font-size:10px}.map-region-list{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px}.map-region-option{width:auto;min-width:max-content;padding:7px 9px;font-size:10px}.map-canvas{min-height:260px}.map-canvas .map-up-button{top:12px;left:12px}.map-actions{top:12px;right:12px;gap:5px}.map-actions .map-refresh-button,.map-actions .map-fullscreen-button{padding:7px;font-size:0}.map-actions svg{width:17px;height:17px}.map-canvas .leaflet-control-zoom{margin:10px}.map-panel:fullscreen .map-body,.shell.map-page .map-body{grid-template-rows:auto minmax(0,1fr);height:auto}.shell.map-page .map-region-sidebar{max-height:92px}}
+
+        /* Tooltip nama kecamatan saat kursor diarahkan ke poligon peta. */
+        #weather-map .leaflet-tooltip.map-kecamatan-label {
+            padding: 5px 9px;
+            max-width: 148px;
+            border: 1px solid rgba(37, 83, 111, .22);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, .92);
+            color: #173f5d;
+            box-shadow: 0 2px 7px rgba(18, 49, 77, .14);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 11px;
+            font-weight: 800;
+            line-height: 1.35;
+            text-align: center;
+            white-space: normal;
+            overflow-wrap: normal;
+            pointer-events: none;
+        }
+        #weather-map .leaflet-tooltip.map-kecamatan-label::before { display: none; }
+        @media (max-width: 640px) {
+            #weather-map .leaflet-tooltip.map-kecamatan-label {
+                max-width: 105px;
+                padding: 3px 5px;
+                font-size: 9px;
+                line-height: 1.25;
+            }
+        }
     </style>
     <style>
         body{background:radial-gradient(ellipse at 8% 0%,#f8fbff 0%,#edf4fa 44%,#e7f0f7 100%)}
@@ -215,6 +249,269 @@
         .hero-observation-date{display:block;margin-top:3px;color:#ffebc5;font-size:10px;line-height:1.4}
         .hero-observation-date[hidden]{display:none!important}
     </style>
+    <style>
+/* CERAH - Berita gaya portal: daftar horizontal, bukan kartu 3 kolom */
+#news-section .news-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    overflow: visible;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+#news-section .news-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: 175px minmax(0, 1fr) 122px;
+    grid-template-areas:
+        "meta title action"
+        "meta summary action"
+        "meta tags action";
+    align-items: start;
+    column-gap: 22px;
+    row-gap: 7px;
+    width: 100%;
+    min-width: 0;
+    min-height: 130px;
+    padding: 19px 23px 19px 26px;
+    margin: 0;
+    border: 1px solid #dce7f1;
+    border-radius: 17px;
+    background: #fff;
+    box-shadow: 0 7px 20px rgba(32, 75, 112, 0.055);
+    text-decoration: none;
+    transition: border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+#news-section .news-card:not(.news-empty)::before {
+    position: absolute;
+    top: 17px;
+    bottom: 17px;
+    left: 0;
+    width: 3px;
+    border-radius: 0 4px 4px 0;
+    background: #4a99ca;
+    content: '';
+}
+#news-section .news-card:hover {
+    transform: none;
+    border-color: #a8cce4;
+    background: #fbfdff;
+    box-shadow: 0 11px 24px rgba(32, 75, 112, 0.085);
+}
+#news-section .news-card-meta {
+    grid-area: meta;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 10px;
+    min-width: 0;
+    height: 100%;
+    padding-right: 17px;
+    border-right: 1px solid #e6eef5;
+    color: #7e8fa1;
+    font-size: 11px;
+    line-height: 1.6;
+}
+#news-section .news-card-source {
+    display: inline-block;
+    max-width: 100%;
+    padding: 5px 8px;
+    border-radius: 8px;
+    background: #eaf4fc;
+    color: #236ea8;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1.45;
+    white-space: normal;
+}
+#news-section .news-card-meta time {
+    display: block;
+    color: #71869a;
+    font-size: 11px;
+    font-weight: 600;
+}
+#news-section .news-card-title {
+    grid-area: title;
+    margin: 0;
+    color: #193856;
+    font-size: clamp(15px, 1.4vw, 18px);
+    font-weight: 800;
+    line-height: 1.42;
+    letter-spacing: -.25px;
+    overflow-wrap: anywhere;
+}
+#news-section .news-card-summary {
+    grid-area: summary;
+    display: -webkit-box;
+    max-width: 88ch;
+    margin: 0;
+    overflow: hidden;
+    color: #677f95;
+    font-size: 12px;
+    line-height: 1.65;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+#news-section .news-card-tags {
+    grid-area: tags;
+    display: flex;
+    flex-wrap: wrap;
+    align-self: end;
+    gap: 6px;
+    margin: 0;
+    padding-top: 3px;
+}
+#news-section .news-card-tag {
+    padding: 4px 8px;
+    border-radius: 7px;
+    background: #eef6fc;
+    color: #40799e;
+    font-size: 10px;
+}
+#news-section .news-card-cta {
+    grid-area: action;
+    align-self: center;
+    justify-self: end;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #2374aa;
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+#news-section .news-card:hover .news-card-cta { color: #145788; }
+#news-section .news-card:focus-visible {
+    outline: 3px solid #90c5e8;
+    outline-offset: 3px;
+}
+#news-section .news-card.news-empty {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100px;
+    padding: 23px;
+    text-align: center;
+    color: #748aa0;
+}
+#news-section .news-card.news-empty::before { display: none; }
+@media (max-width: 980px) {
+    #news-section .news-card {
+        grid-template-columns: 135px minmax(0, 1fr);
+        grid-template-areas:
+            "meta title"
+            "meta summary"
+            "meta tags"
+            "meta action";
+        column-gap: 15px;
+        padding: 17px 18px 17px 20px;
+    }
+    #news-section .news-card-cta { justify-self: start; margin-top: 4px; }
+}
+@media (max-width: 640px) {
+    #news-section .news-grid { gap: 9px; }
+    #news-section .news-card {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            "meta"
+            "title"
+            "summary"
+            "tags"
+            "action";
+        gap: 9px;
+        min-height: 0;
+        padding: 16px 17px 16px 19px;
+    }
+    #news-section .news-card-meta {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        height: auto;
+        padding: 0;
+        border-right: 0;
+    }
+    #news-section .news-card-title { font-size: 15px; }
+    #news-section .news-card-summary { font-size: 11px; -webkit-line-clamp: 3; }
+    #news-section .news-card-cta { margin-top: 1px; }
+}
+        /* ===== CERAH: navbar menempel + tampilan mobile ===== */
+        html{scroll-padding-top:96px;-webkit-text-size-adjust:100%}
+        body{overflow-x:clip}
+        .topbar{position:sticky;top:0;z-index:3000;background:transparent;box-shadow:none;clip-path:none}
+        .topbar::before{content:'';position:absolute;z-index:-1;top:0;bottom:0;left:-100vmax;right:-100vmax;background:rgba(234,242,248,.92);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+        img,svg,video{max-width:100%}
+        .history-table-scroll,.forecast-table-wrap,.climate-chart-wrap,.region-day-row,.days-grid{-webkit-overflow-scrolling:touch}
+
+        @media(max-width:1000px){
+            .current-layout{grid-template-columns:minmax(0,1fr)!important;gap:14px}
+            .current-layout .hero{height:auto!important;min-height:0!important}
+            .current-layout .hero-current,.current-layout .hero-metrics{transform:none!important}
+            .current-layout .hero-metrics{width:100%;max-width:none;margin:0}
+            .forecast24-card{height:auto!important}
+            .forecast24-card .forecast-table-wrap{flex:none!important;max-height:340px!important}
+            .history-climate-layout{grid-template-columns:minmax(0,1fr)!important}
+        }
+
+        @media(max-width:640px){
+            html{scroll-padding-top:116px}
+            .shell{padding-left:14px;padding-right:14px}
+            /* Navbar: baris 1 = logo + wilayah + segarkan, baris 2 = menu */
+            .topbar{height:auto!important;min-height:0!important;padding:8px 0 8px!important;flex-wrap:wrap;gap:6px 8px;align-items:center}
+            .shell.map-page .topbar{padding:6px 12px!important}
+            .brand{order:1;gap:7px}
+            .brand-logo{width:38px;height:38px}
+            .brand-name{font-size:15px}
+            .brand-tagline{display:none}
+            .main-nav{display:contents}
+            .location-control{order:2;position:static;flex:1 1 0;min-width:0;width:auto;margin:0}
+            .location-toggle{width:100%;min-height:42px;padding:6px 10px;gap:6px}
+            .location-toggle>span:first-child{display:none}
+            .nav-location-current{min-width:0;flex:1;text-align:left}
+            .nav-location-current strong{max-width:none;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+            .location-menu{position:absolute;top:100%;left:0;right:0;width:auto;max-height:72vh;margin-top:6px;overflow:auto}
+            .location-options{max-height:46vh}
+            .top-actions{order:3;margin-left:0;gap:6px}
+            .icon-btn{min-width:42px;min-height:42px}
+            .topbar::after{content:'';order:4;flex:0 0 100%;height:0}
+            .main-nav>.nav-link{order:5;flex:1 1 0;justify-content:center;min-height:38px;padding:8px 4px;font-size:12px;border:1px solid #d9e6f1;background:rgba(255,255,255,.7);text-align:center}
+            .main-nav>.nav-link.active{background:#e3f0fb;border-color:#bcd9ee;color:#155a98}
+            /* Konten */
+            .page{padding-top:14px}
+            .intro h1{font-size:24px}
+            .intro p{font-size:13px}
+            .section-head{flex-wrap:wrap;gap:8px}
+            .section-title{font-size:18px}
+            .current-layout .hero{padding:16px 15px}
+            .hero-current .temperature{font-size:54px}
+            .hero-current .weather-symbol{font-size:38px}
+            .hero-current .condition{font-size:16px}
+            .forecast24-card{padding:13px 11px}
+            .forecast24-card .forecast-table-wrap{max-height:300px!important}
+            .climate-chart-head{flex-wrap:wrap}
+            .climate-chart-head>span{white-space:normal}
+            .climate-chart-controls{display:grid!important;grid-template-columns:1fr 1fr;gap:8px}
+            .climate-chart-controls select{font-size:16px;min-height:40px;padding-top:8px;padding-bottom:8px}
+            .climate-chart-wrap{margin-left:-4px;margin-right:-4px;padding-bottom:4px}
+            .climate-chart{min-width:620px}
+            .history-table-panel{border-radius:17px}
+            .map-region-option{min-height:36px}
+            .weather-map-popup .leaflet-popup-content{width:min(270px,calc(100vw - 90px))!important}
+            .footer{flex-direction:column;gap:6px;text-align:left}
+        }
+
+        @media(max-width:380px){
+            .shell{padding-left:10px;padding-right:10px}
+            .brand-name{font-size:13px}
+            .main-nav>.nav-link{font-size:11px;padding-left:2px;padding-right:2px}
+            .hero-current .temperature{font-size:48px}
+            .intro h1{font-size:22px}
+        }
+    </style>
 </head>
 <body>
 <div id="cerah-splash" class="cerah-splash" role="status" aria-live="polite" aria-label="Memuat CERAH">
@@ -226,7 +523,8 @@
     </div>
 </div>
 <div class="cerah-network-bar" aria-hidden="true"></div>
-<noscript><style>.cerah-splash{display:none!important}</style></noscript>
+<noscript><style>.cerah-splash{display:none!important}
+    </style></noscript>
 <script>
 // Pengaman: loader awal tidak akan menutupi situs selamanya jika API gagal atau izin lokasi tertunda.
 window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('is-hidden'), 12000);
@@ -259,31 +557,31 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
     </header>
     <main class="page">
         <div class="intro" id="beranda">
-            <div><p class="eyebrow">PRAKIRAAN CUACA WILAYAH KEPULAUAN RIAU</p><h1>Pantau Cuaca Lokal</h1><p>Kenali kondisi langit, pantau perubahan cuaca, dan siapkan aktivitasmu dengan lebih percaya diri.</p></div>
+            <div><h1>Cuaca Kepulauan Riau</h1><p>Prakiraan cuaca dan informasi iklim wilayah Kepri.</p></div>
         </div>
         <div class="error-banner" id="error-banner" role="status"></div>
         <section class="section detail-only" id="current-hero-wrap" data-anchor="prakiraan">
             <div class="current-layout"><div class="hero" aria-live="polite"><div class="hero-content" id="hero-content"><div class="loading">Mengambil prakiraan cuaca…</div></div></div><aside class="forecast24-card"><h2 class="forecast24-title">Prakiraan 24 Jam Mendatang</h2><div class="forecast-table-wrap"><table class="forecast-table"><thead><tr><th>Jam</th><th>Kondisi Cuaca</th><th>Suhu</th><th>Peluang Hujan</th></tr></thead><tbody id="hours-list"><tr><td colspan="4">Memuat prakiraan per jam…</td></tr></tbody></table></div></aside></div>
         </section>
         <section class="section" id="map-section">
-            <div class="section-head"><div><h2 class="section-title">Peta wilayah Kepulauan Riau</h2><p class="section-subtitle">Pilih kabupaten/kota di sisi kiri, lalu telusuri kecamatan hingga kelurahan/desa.</p></div><span class="map-level" id="map-level">Kabupaten/Kota · Kepulauan Riau</span></div>
+            <div class="section-head"><div><h2 class="section-title">Peta wilayah Kepulauan Riau</h2><p class="section-subtitle">Pilih wilayah untuk melihat kecamatan dan kelurahan/desa.</p></div><span class="map-level" id="map-level">Kabupaten/Kota · Kepulauan Riau</span></div>
             <div class="map-panel" id="map-panel">
                 <div class="map-body">
                     <aside class="map-region-sidebar" aria-label="Pilih kabupaten atau kota"><h3>Kabupaten / Kota</h3><div class="map-region-list" id="map-region-list"><span class="map-region-loading">Memuat daftar wilayah…</span></div></aside>
                     <div class="map-canvas">
                         <button class="map-up-button" id="map-up" type="button" hidden>← Kembali</button>
                         <div class="map-actions">
-                            <button class="map-refresh-button" id="map-boundary-refresh" type="button" title="Minta ulang batas wilayah dari BIG"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9a7 7 0 0 1 11.6-2L20 12M4 12l2.8 5a7 7 0 0 0 11.6-2"/></svg><span>Muat ulang batas</span></button>
+                            <button class="map-refresh-button" id="map-boundary-refresh" type="button" title="Segarkan batas wilayah yang tersimpan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9a7 7 0 0 1 11.6-2L20 12M4 12l2.8 5a7 7 0 0 0 11.6-2"/></svg><span>Segarkan batas</span></button>
                             <button class="map-fullscreen-button" id="map-fullscreen" type="button" aria-label="Tampilkan peta layar penuh" title="Tampilkan peta layar penuh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3m13-5h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3"/></svg><span>Layar penuh</span></button>
                         </div>
                         <div id="weather-map" role="application" aria-label="Peta interaktif cuaca Provinsi Kepulauan Riau"><div class="map-fallback">Memuat peta wilayah…</div></div>
                     </div>
                 </div>
-                <div class="map-legend" id="map-legend" hidden></div><div class="map-note"><span id="map-note-text">Pilih batas kecamatan untuk membuka kelurahan/desa.</span><span>© OpenStreetMap · Batas wilayah BIG</span></div>
+                <div class="map-legend" id="map-legend" hidden></div><div class="map-note"><span id="map-note-text">Arahkan kursor ke wilayah untuk melihat namanya.</span><span>© OpenStreetMap · Poligon Emsifa/cahyadsn (indikatif)</span></div>
             </div>
         </section>
         <div class="climate-chart-card">
-            <div class="climate-chart-head"><div class="climate-chart-heading"><strong id="climate-chart-title">Riwayat Iklim Harian</strong><span class="climate-chart-subtitle" id="climate-chart-subtitle">Amati perubahan cuaca dari hari ke hari dan sesuaikan rentang waktu untuk membandingkan polanya.</span><span id="climate-source" class="climate-chart-context"></span></div></div>
+            <div class="climate-chart-head"><div class="climate-chart-heading"><strong id="climate-chart-title">Riwayat Iklim Harian</strong><span class="climate-chart-subtitle" id="climate-chart-subtitle" hidden></span><span id="climate-source" class="climate-chart-context"></span></div></div>
             <div class="climate-chart-controls">
                 <label>Visualisasi<select id="climate-metric"><option value="rain">Jumlah curah hujan</option><option value="temperature">Suhu rata-rata</option><option value="aqi">Kualitas udara (US AQI)</option><option value="humidity">Kelembapan</option></select></label>
                 <label>Rentang waktu<select id="climate-range"><option value="7">7 hari</option><option value="30" selected>30 hari</option><option value="90">90 hari</option><option value="365">1 tahun</option></select></label>
@@ -307,7 +605,7 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
             </section>
         </div>
         <section class="section detail-only" id="activity-advice">
-            <div class="section-head"><div><h2 class="section-title">Saran aktivitas</h2><p class="section-subtitle">Saran praktis berdasarkan kondisi cuaca terkini</p></div></div>
+            <div class="section-head"><div><h2 class="section-title">Saran aktivitas</h2><p class="section-subtitle">Berdasarkan prakiraan 3 jam ke depan.</p></div></div>
             <div class="content-grid">
                 <div class="advice-list" id="advice-list"><div class="advice-card"><div class="advice-message">Menyiapkan saran aktivitas…</div></div></div>
             </div>
@@ -315,7 +613,7 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
         <section class="section news-section" id="news-section">
             <div class="section-head"><div><h2 class="section-title">Berita Cuaca & Lingkungan Kepri</h2></div><span class="map-level">Sumber: ANTARA Kepri</span></div>
             <div class="news-grid" id="news-grid" aria-live="polite"><article class="news-card news-empty">Memuat berita terkait…</article></div>
-            <p class="news-attribution">Judul, ringkasan, dan waktu terbit berasal dari ANTARA Kepri. Buka tautan untuk membaca artikel lengkap di situs sumber.</p>
+            
         </section>
     </main>
     <footer class="footer"><span>Cuaca diperbarui berkala · Waktu lokal WIB (Asia/Jakarta)</span><span class="attribution"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8m0-12.8L5.6 18.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Data cuaca dari <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a></span></footer>
@@ -357,6 +655,7 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
     }
 
     const regionsUrl = @json($regionsEndpoint);
+    const currentWeatherUrl = @json(url('/api/weather/current'));
     const mapWeatherUrl = @json(url('/api/weather/map'));
     const mapBoundaryUrl = @json(url('/api/weather/boundaries'));
     const refreshUrl = @json(url('/api/weather/refresh'));
@@ -410,6 +709,33 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
         if (n === 82) return {label:'Hujan Sangat Lebat', icon:icons.rain};
         if ([95,96,99].includes(n)) return {label:'Hujan Petir', icon:icons.storm};
         return {label:'Kondisi Cuaca', icon:icons.partly};
+    }
+    // Label harian ditentukan dari total curah hujan, bukan weather_code harian
+    // (kode harian Open-Meteo = kondisi terburuk sepanjang hari, sehingga 1 jam gerimis
+    // membuat seluruh hari berlabel hujan).
+    function dailyCondition(item) {
+        const code = item.weather_code;
+        // Label mengikuti curah hujan per jam tertinggi hari itu (puncak hujan), bila tersedia.
+        const peak = item.precipitation_max_hourly_mm == null ? null : Number(item.precipitation_max_hourly_mm);
+        if (peak !== null && Number.isFinite(peak)) {
+            const pc = (code === null || code === undefined || code === '') ? null : Number(code);
+            if (peak >= 20) return {label:'Hujan Lebat', icon:icons.rain};
+            if (peak > 5) return {label:'Hujan Sedang', icon:icons.rain};
+            if (peak >= 1) return {label:'Hujan Ringan', icon:icons.drizzle};
+            if (peak >= 0.5) return {label:'Gerimis', icon:icons.drizzle};
+            if (pc !== null && [0,1,2,3,45,48].includes(pc)) return condition(pc, 1, item.observed_on);
+            return {label:'Berawan', icon:icons.clouds};
+        }
+        const mm = item.precipitation_mm == null ? null : Number(item.precipitation_mm);
+        const n = (code === null || code === undefined || code === '') ? null : Number(code);
+        if (n !== null && [95,96,99].includes(n) && mm === null) return condition(n, 1, item.observed_on);
+        if (mm === null || !Number.isFinite(mm)) return n === null ? {label:'Kondisi belum tersedia', icon:icons.clouds} : condition(n, 1, item.observed_on);
+        if (mm >= 20) return {label:'Hujan Lebat', icon:icons.rain};
+        if (mm > 5) return {label:'Hujan Sedang', icon:icons.rain};
+        if (mm >= 1) return {label:'Hujan Ringan', icon:icons.drizzle};
+        // < 1 mm: hari dianggap tidak hujan (sama dengan batas Hari Tanpa Hujan); pakai kode untuk tingkat awan/kabut.
+        if (n !== null && [0,1,2,3,45,48].includes(n)) return condition(n, 1, item.observed_on);
+        return {label:'Berawan', icon:icons.clouds};
     }
     function number(value, digits=0) {
         if (value === null || value === undefined || value === '') return '—';
@@ -481,6 +807,8 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
         } else container.append(row);
     }
     function initWeatherMap() {
+        // Aman jika dipanggil dari observer dan klik tab Peta pada waktu bersamaan.
+        if (weatherMap) return;
         const container = document.getElementById('weather-map');
         const fullscreenButton = document.getElementById('map-fullscreen');
         const mapPanel = document.getElementById('map-panel');
@@ -493,7 +821,7 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
         document.getElementById('map-boundary-refresh').addEventListener('click', async event => {
             const button = event.currentTarget;
             button.disabled = true;
-            document.getElementById('map-note-text').textContent = 'Meminta ulang batas wilayah dari BIG…';
+            document.getElementById('map-note-text').textContent = 'Menyegarkan poligon batas wilayah…';
             const current = mapPath[mapPath.length - 1];
             boundaryCache.delete(`${current.level}:${current.code}`);
             try {
@@ -546,9 +874,33 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
         }).addTo(weatherMap);
         L.control.zoom({position:'bottomleft'}).addTo(weatherMap);
         mapBoundaries = L.layerGroup().addTo(weatherMap);
-        renderWeatherMap();
-        loadMapWeather();
+        // Peta tidak menggunakan penanda titik; poligon dibaca dari cache lokal.
+        renderWeatherMap(true);
+        void loadMapWeather();
     }
+    // Peta adalah konten sekunder. Hindari permintaan BIG ketika pengguna hanya
+    // membuka halaman untuk melihat kondisi saat ini (penting untuk php artisan serve).
+    function initWeatherMapWhenVisible() {
+        const panel = document.getElementById('map-panel');
+        let initialized = false;
+        const init = () => {
+            if (initialized) return;
+            initialized = true;
+            initWeatherMap();
+        };
+        if (!('IntersectionObserver' in window) || !panel) {
+            window.setTimeout(init, 1800);
+            return;
+        }
+        const observer = new IntersectionObserver(entries => {
+            if (entries.some(entry => entry.isIntersecting)) {
+                observer.disconnect();
+                init();
+            }
+        }, {rootMargin:'250px 0px'});
+        observer.observe(panel);
+    }
+
     async function loadMapWeather() {
         try {
             const response = await fetchWithLoader(mapWeatherUrl, {headers:{Accept:'application/json'},cache:'no-store'});
@@ -580,27 +932,28 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
         const key = `${level}:${code}`;
         if (!forceRefresh && boundaryCache.has(key)) return boundaryCache.get(key);
         if (!forceRefresh && boundaryRequests.has(key)) return boundaryRequests.get(key);
+        // Laravel membaca poligon dari disk terlebih dahulu; bila belum pernah
+        // diunduh, layanan alternatif akan dihubungi SATU kali lalu disimpan lokal.
         const request = (async () => {
-            let lastError;
-            for (let attempt = 0; attempt < 3; attempt++) {
-                try {
-                    const refreshParam = forceRefresh ? '?refresh=1' : '';
-                    const response = await fetchWithLoader(`${mapBoundaryUrl}/${level}/${encodeURIComponent(code)}${refreshParam}`, {headers:{Accept:'application/geo+json, application/json'}, cache:'no-store'});
-                    if (!response.ok) {
-                        let detail = '';
-                        try { detail = (await response.json()).message ?? ''; } catch (error) {}
-                        throw new Error(detail || 'Batas administrasi belum dapat dimuat.');
-                    }
-                    const data = await response.json();
-                    if (data.type !== 'FeatureCollection' || !Array.isArray(data.features) || data.features.length === 0) throw new Error('Data batas wilayah kosong.');
-                    boundaryCache.set(key, data);
-                    return data;
-                } catch (error) {
-                    lastError = error;
-                    if (attempt < 2) await new Promise(resolve => setTimeout(resolve, 250 * (attempt + 1)));
-                }
+            const param = forceRefresh ? '?refresh=1' : '';
+            const response = await fetchWithLoader(`${mapBoundaryUrl}/${level}/${encodeURIComponent(code)}${param}`, {
+                headers:{Accept:'application/geo+json, application/json'}, cache:'no-store'
+            });
+            if (response.status === 204) {
+                boundaryCache.set(key, null);
+                return null;
             }
-            throw lastError ?? new Error('Batas administrasi belum dapat dimuat.');
+            if (!response.ok) {
+                let detail = '';
+                try { detail = (await response.json()).message ?? ''; } catch (error) {}
+                throw new Error(detail || 'Batas administrasi belum dapat dimuat.');
+            }
+            const data = await response.json();
+            if (data.type !== 'FeatureCollection' || !Array.isArray(data.features) || data.features.length === 0) {
+                throw new Error('Data batas wilayah kosong.');
+            }
+            boundaryCache.set(key, data);
+            return data;
         })();
         boundaryRequests.set(key, request);
         try {
@@ -629,11 +982,11 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
         // Batas BIG bisa membawa kode BPS dan kode administrasi PUM yang tidak sama.
         // Pilih kode yang benar-benar cocok dengan tabel regions terlebih dahulu.
         const fields = level === 'municipalities'
-            ? ['kdbbps','kdpkab','kdppum']
+            ? ['code','kode','kdppum','kdbbps','kdpkab']
             : level === 'districts'
-                ? ['kdcbps','kdcpum']
-                : ['kdebps','kdepum'];
-        const nameFields = level === 'municipalities' ? ['wadmkk','namobj'] : level === 'districts' ? ['wadmkc','namobj'] : ['wadmkd','namobj'];
+                ? ['code','kode','kdcpum','kdcbps']
+                : ['code','kode','kdepum','kdebps'];
+        const nameFields = level === 'municipalities' ? ['name','nama','wadmkk','namobj'] : level === 'districts' ? ['name','nama','wadmkc','namobj'] : ['name','nama','wadmkd','namobj'];
         const codes = fields.map(field => normalizedAdminCode(featureProperty(feature, field))).filter(Boolean);
         const normalizeCode = value => String(value ?? '').replace(/\D/g, '');
         const matchingCode = codes.find(code => regions.some(item => normalizeCode(item.code) === normalizeCode(code)));
@@ -670,7 +1023,7 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
             values.temperature_c, values.relative_humidity, values.weather_code,
             values.visibility_m, values.us_aqi, values.wind_speed_kmh
         ].some(value => value !== null && value !== undefined && value !== '');
-        if (!hasWeather) return `<div class="map-popup"><div class="map-popup-head">${name}<span class="map-popup-time">${escapeHtml(region.type)}</span></div><p class="map-popup-unavailable">Data cuaca terkini belum tersedia. Sinkronkan data cuaca wilayah ini terlebih dahulu.</p></div>`;
+        if (!hasWeather) return `<div class="map-popup"><div class="map-popup-head">${name}<span class="map-popup-time">${escapeHtml(region.type)}</span></div><p class="map-popup-unavailable">Data cuaca terkini belum tersedia untuk wilayah ini.</p><button type="button" class="map-popup-title-button" data-sync-region-code="${escapeHtml(region.code)}">Muat data sekarang</button></div>`;
         const info = condition(values.weather_code, values.is_day, values.valid_at);
         const observedAt = values.valid_at ? new Intl.DateTimeFormat('id-ID', {hour:'2-digit', minute:'2-digit', timeZone:'Asia/Jakarta'}).format(new Date(values.valid_at)) : '—';
         return `<div class="map-popup"><div class="map-popup-head">${name}<span class="map-popup-time">${observedAt} WIB</span></div><div class="map-popup-current"><span class="map-popup-condition"><span class="map-popup-icon">${info.icon}</span>${escapeHtml(info.label)}</span><strong class="map-popup-temp">${values.temperature_c == null ? '—' : `${number(values.temperature_c,1)}°C`}</strong></div><div class="map-popup-details"><div class="map-popup-detail"><span>Kelembapan</span><b>${values.relative_humidity == null ? '—' : `${number(values.relative_humidity)}%`}</b></div><div class="map-popup-detail"><span>Peluang hujan</span><b>${values.precipitation_probability == null ? '—' : `${number(values.precipitation_probability)}%`}</b></div><div class="map-popup-detail"><span>Jarak Pandang</span><b class="map-popup-reading">${visibilityReading(values.visibility_m)}</b></div><div class="map-popup-detail"><span>Kualitas Udara (AQI)</span><b class="map-popup-reading">${aqiReading(values.us_aqi)}</b></div></div></div>`;
@@ -723,12 +1076,25 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
         button.hidden = mapPath.length <= 1;
         const levelLabel = node.level === 'municipalities' ? 'Kabupaten/Kota' : node.level === 'districts' ? 'Kecamatan' : 'Kelurahan/Desa';
         document.getElementById('map-level').textContent = `${levelLabel} · ${mapMunicipalityLabel(node.name)}`;
-        document.getElementById('map-note-text').textContent = `Memuat batas ${levelLabel.toLocaleLowerCase('id')} ${node.name}…`;
+        mapBoundaries.clearLayers();
+        // Kamera langsung ke area pilihan walaupun poligon sedang dibaca dari disk.
+        const currentRegion = regions.find(region => region.code === node.code);
+        if (fit && currentRegion && node.level !== 'municipalities') {
+            const lat = Number(currentRegion.latitude), lng = Number(currentRegion.longitude);
+            if (Number.isFinite(lat) && Number.isFinite(lng)) weatherMap.setView([lat, lng], node.level === 'villages' ? 12 : 9, {animate:false});
+        } else if (fit && node.level === 'municipalities') {
+            weatherMap.fitBounds(kepriMapBounds, {padding:[18,18],maxZoom:8,animate:false});
+        }
+        const note = document.getElementById('map-note-text');
+        note.textContent = `Memuat area ${levelLabel.toLocaleLowerCase('id')} ${node.name}…`;
+        const boundaryButton = document.getElementById('map-boundary-refresh');
+        boundaryButton.querySelector('span')?.replaceChildren(document.createTextNode('Segarkan batas'));
         try {
             const data = await getBoundaryFeatures(node.level, node.code, forceRefresh);
             if (renderToken !== boundaryRenderToken) return;
+            if (!data) throw new Error('Poligon belum tersedia pada sumber batas wilayah.');
             const polygonFeatures = data.features.filter(feature => ['Polygon','MultiPolygon'].includes(feature.geometry?.type));
-            if (!polygonFeatures.length) throw new Error('Data dari BIG tidak berisi geometri polygon.');
+            if (!polygonFeatures.length) throw new Error('Data batas wilayah tidak berisi geometri poligon.');
             mapBoundaries.clearLayers();
             const layer = L.geoJSON({...data, features:polygonFeatures}, {
             style: feature => {
@@ -738,6 +1104,20 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
             },
             onEachFeature: (feature, polygon) => {
                 const region = mapFeatureRegion(feature, node.level);
+                // Nama kecamatan hanya muncul saat kursor berada di atas poligon.
+                // Tooltip mengikuti kursor dan otomatis hilang ketika kursor keluar.
+                if (node.level === 'districts' && region.name && region.name !== 'Wilayah') {
+                    const kecamatanName = region.name.replace(/^Kecamatan\s+/i, '').trim();
+                    polygon.bindTooltip(escapeHtml(kecamatanName), {
+                        permanent: false,
+                        sticky: true,
+                        direction: 'top',
+                        offset: [0, -8],
+                        className: 'map-kecamatan-label',
+                        opacity: 1,
+                        interactive: false,
+                    });
+                }
                 if (node.level === 'villages') {
                     const values = mapWeatherForBoundary(region);
                     polygon.bindPopup(mapWeatherPopup(region, values), {className:'weather-map-popup', maxWidth:300, closeButton:false, closeOnClick:false});
@@ -785,22 +1165,24 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
                 });
             }
             }).addTo(mapBoundaries);
+            boundaryButton.querySelector('span')?.replaceChildren(document.createTextNode('Segarkan batas'));
             const bounds = layer.getBounds();
             if (!bounds.isValid()) throw new Error('Polygon batas diterima, tetapi koordinatnya tidak bisa dibaca peta.');
             if (fit && bounds.isValid()) weatherMap.fitBounds(bounds, {padding:[30,30], maxZoom:node.level === 'municipalities' ? 8 : node.level === 'districts' ? 12 : 14});
             const nextAction = node.level === 'municipalities' ? 'memilih kabupaten/kota' : node.level === 'districts' ? 'melihat kelurahannya' : 'melihat cuacanya';
             const boundaryLabel = node.level === 'municipalities' ? 'kabupaten/kota' : node.level === 'districts' ? 'kecamatan' : 'kelurahan/desa';
-            document.getElementById('map-note-text').textContent = `${layer.getLayers().length} batas ${boundaryLabel} dimuat. Klik wilayah untuk ${nextAction}.`;
+            document.getElementById('map-note-text').textContent = `Klik wilayah untuk ${nextAction}.${data._meta?.incomplete ? ' Sebagian batas belum tersedia.' : ''}`;
         } catch (error) {
-            if (node.level === 'municipalities') weatherMap.fitBounds(kepriMapBounds, {padding:[18,18], maxZoom:8});
-            if (renderToken === boundaryRenderToken) document.getElementById('map-note-text').textContent = `${error.message || 'Batas wilayah belum dapat dimuat.'} Tekan “Muat ulang batas” untuk mencoba lagi.`;
+            // Tidak menebak-nebak batas wilayah dari titik centroid.
+            if (renderToken === boundaryRenderToken) note.textContent =
+                `Batas wilayah belum tersedia: ${error.message || 'Layanan tidak tersedia.'} Coba tombol “Segarkan batas”.`;
         }
     }
-    function renderWeatherMap() {
+    function renderWeatherMap(fit = false) {
         renderMapRegionList();
         if (!weatherMap || !mapBoundaries) return;
         updateMapLegend();
-        showMapLevel(mapPath[mapPath.length - 1], true);
+        showMapLevel(mapPath[mapPath.length - 1], fit);
     }
     function isVillage(region) { return region?.type === 'village'; }
     function setViewMode(region) {
@@ -918,7 +1300,7 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
         status.hidden = !message;
     }
 
-    function locateUser() {
+    function locateUser({fast = false} = {}) {
         const button = document.getElementById('use-location');
         button.disabled = true;
         button.textContent = 'Mencari lokasi…';
@@ -957,10 +1339,12 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
             }
 
             let locationMatch = null;
-            try {
-                locationMatch = await findVillageByBoundaries(latitude, longitude);
-            } catch (error) {
-                // Use the nearest coordinate when administrative boundaries cannot be reached.
+            if (!fast) {
+                try {
+                    locationMatch = await findVillageByBoundaries(latitude, longitude);
+                } catch (error) {
+                    // Gunakan titik terdekat bila layanan BIG tidak tersedia.
+                }
             }
             const selectedVillage = locationMatch ?? nearest.region;
             selectedCode = selectedVillage.code;
@@ -1020,7 +1404,27 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
     function renderHero(data) {
         const region = data.wilayah;
         const current = data.cuaca_saat_ini;
-        const info = condition(current?.weather_code, current?.is_day, current?.valid_at);
+        let info = condition(current?.weather_code, current?.is_day, current?.valid_at);
+        let conditionNote = current?.condition_note || '';
+        // Curah hujan saat ini: < 0,5 mm = berawan/cerah, 0,5–<1 mm = ikut model (gerimis), >= 1 mm = hujan, walau kode cuaca model masih berawan/gerimis.
+        const rainNowMm = Number(current?.rain_mm);
+        const codeNow = Number(current?.weather_code);
+        if (Number.isFinite(rainNowMm)) {
+            if (rainNowMm >= 1) {
+                // Label hujan murni dari curah hujan, apa pun kode model (termasuk kode petir).
+                info = rainNowMm >= 20 ? {label:'Hujan Lebat', icon:icons.rain}
+                    : rainNowMm > 5 ? {label:'Hujan Sedang', icon:icons.rain}
+                    : {label:'Hujan Ringan', icon:icons.drizzle};
+                conditionNote = '';
+            } else if (rainNowMm >= 0.5) {
+                info = {label:'Gerimis', icon:icons.drizzle};
+                conditionNote = '';
+            } else if (codeNow >= 51) {
+                // < 0,5 mm: bukan hujan/gerimis; tampilkan kondisi langit.
+                info = condition(3, current?.is_day, current?.valid_at);
+                conditionNote = '';
+            }
+        }
         const timestamp = current?.valid_at ? new Date(current.valid_at) : null;
         const placeParts = ancestors(region).filter(item => item.type !== 'province').reverse();
         const placeNames = (placeParts.length ? placeParts : [region]).map(item => item.name.replace(/^(Kota|Kabupaten)\s+/i, ''));
@@ -1030,11 +1434,28 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
         const airClass = classifyUsAqi(usAqi);
         const rainChance = current?.precipitation_probability == null ? null : Number(current.precipitation_probability);
         document.getElementById('hero-content').innerHTML = `
-            <div class="hero-today"><div class="hero-current"><div class="hero-current-meta"><div class="hero-place"><span class="hero-place-main">${escapeHtml(place)}</span>${placeContext ? `<span class="hero-place-context">${escapeHtml(placeContext)}</span>` : ''}</div><div class="hero-date"><span class="hero-calendar-date" id="hero-calendar-date"></span><span class="hero-observation-date" id="hero-observation-date" data-valid-at="${escapeHtml(current?.valid_at ?? '')}" hidden></span></div></div><div class="hero-current-weather"><div class="temp-row"><span class="weather-symbol">${info.icon}</span><div class="temperature">${number(current?.temperature_c)}<sup>°</sup></div></div><div class="condition">${info.label}</div><div class="feels">Terasa seperti ${number(current?.apparent_temperature_c)}°C</div></div></div>
+            <div class="hero-today"><div class="hero-current"><div class="hero-current-meta"><div class="hero-place"><span class="hero-place-main">${escapeHtml(place)}</span>${placeContext ? `<span class="hero-place-context">${escapeHtml(placeContext)}</span>` : ''}</div><div class="hero-date"><span class="hero-calendar-date" id="hero-calendar-date"></span><span class="hero-observation-date" id="hero-observation-date" data-valid-at="${escapeHtml(current?.valid_at ?? '')}" hidden></span></div></div><div class="hero-current-weather"><div class="temp-row"><span class="weather-symbol">${info.icon}</span><div class="temperature">${number(current?.temperature_c)}<sup>°</sup></div></div><div class="condition">${info.label}${conditionNote ? `<small style="display:block;font-size:11px;font-weight:600;opacity:.8;margin-top:2px">${escapeHtml(conditionNote)}</small>` : ''}</div><div class="feels">Terasa seperti ${number(current?.apparent_temperature_c)}°C</div></div></div>
             <div class="hero-metrics">${heroMetric('Kelembapan','humidity',`${number(current?.relative_humidity)}%`)}${heroMetric('Curah Hujan','rain',`${number(current?.rain_mm,1)} mm`)}${heroMetric('Jarak Pandang','visibility',visibilityReading(current?.visibility_m))}${heroMetric('Kualitas Udara (US AQI)','air',aqiReading(usAqi),`quality-${airClass.tone}`)}</div></div>`;
         updateHeroCalendarDate();
         const freshness = data.ditarik_pada ? new Date(data.ditarik_pada) : (data.diperbarui_pada ? new Date(data.diperbarui_pada) : null);
         document.getElementById('live-label').textContent = freshness ? `Diperbarui ${localHour(freshness)}` : 'Menunggu data cuaca';
+        window.__cerahFreshAt = freshness;
+        // Tanggal riwayat yang bolong ditambal di belakang layar setelah halaman tampil.
+        try {
+            const reg = currentRegion();
+            const hist = data.riwayat_30_hari || [];
+            window.__gapTried = window.__gapTried || new Set();
+            if (reg && reg.type === 'village' && !window.__gapTried.has(reg.code) && hist.some(h => h.precipitation_mm == null)) {
+                window.__gapTried.add(reg.code);
+                setTimeout(async () => {
+                    try {
+                        const r = await fetch(`${regionsUrl}/${encodeURIComponent(reg.code)}/fill-gaps`, {method:'POST', headers:{Accept:'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]')?.content ?? ''}});
+                        const j = await r.json();
+                        if (j.filled > 0 && currentRegion()?.code === reg.code) void loadWeather();
+                    } catch (e) {}
+                }, 4000);
+            }
+        } catch (e) {}
     }
     function classifyUsAqi(value) {
         if (value == null || !Number.isFinite(value)) return {label:'Belum tersedia', tone:'unknown'};
@@ -1114,7 +1535,7 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
             } catch (error) {}
             const tags = (Array.isArray(article.keywords) ? article.keywords : []).slice(0,3)
                 .map(keyword => `<span class="news-card-tag">${escapeHtml(keyword)}</span>`).join('');
-            return `<a class="news-card" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer"><span class="news-card-meta"><span class="news-card-source">${escapeHtml(article.source)}</span><time>${escapeHtml(date)}</time></span><strong class="news-card-title">${escapeHtml(article.title)}</strong><span class="news-card-summary">${escapeHtml(article.summary || 'Buka artikel di situs sumber untuk membaca informasi selengkapnya.')}</span><span class="news-card-tags">${tags}</span></a>`;
+            return `<a class="news-card" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer"><span class="news-card-meta"><span class="news-card-source">${escapeHtml(article.source)}</span><time>${escapeHtml(date)}</time></span><strong class="news-card-title">${escapeHtml(article.title)}</strong><span class="news-card-summary">${escapeHtml(article.summary || 'Buka artikel di situs sumber untuk membaca informasi selengkapnya.')}</span><span class="news-card-tags">${tags}</span><span class="news-card-cta">Baca berita <span aria-hidden="true">↗</span></span></a>`;
         }).join('');
     }
 
@@ -1133,7 +1554,7 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
         const air = classifyUsAqi(current?.us_aqi == null ? null : Number(current.us_aqi));
         const metrics = [
             ['Kelembapan', 'humidity', `${number(current?.relative_humidity)}%`, Number(current?.relative_humidity) >= 75 ? 'Udara terasa lembap' : 'Kondisi kelembapan udara'],
-            ['Curah Hujan', 'rain', `${number(current?.rain_mm,1)} mm`, 'Dalam periode pengamatan'],
+            [current?.rain_24h_mm == null ? 'Curah Hujan' : 'Hujan 24 Jam', 'rain', `${number(current?.rain_24h_mm ?? current?.rain_mm,1)} mm`, current?.rain_24h_mm == null ? 'Dalam periode pengamatan' : `Sekarang ${number(current?.rain_mm,1)} mm${current?.last_rain_at ? ' · hujan terakhir ' + localHour(dateParts(current.last_rain_at)) : ''}`],
             ['Jarak Pandang', 'visibility', visibilityReading(current?.visibility_m), 'Perkiraan jarak pandang'],
             ['Kualitas Udara', 'air', aqiReading(current?.us_aqi, 'AQI'), `US AQI · ${air.label}`],
         ];
@@ -1156,9 +1577,7 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
         document.getElementById('days-grid').innerHTML = orderedHistory.map(item => {
             const date = dateParts(item.observed_on);
             const dateLabel = new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',weekday:'short',day:'numeric',month:'short'}).format(date);
-            const info = item.weather_code == null
-                ? { icon: '☁️', label: 'Kondisi belum tersedia' }
-                : condition(item.weather_code, 1, item.observed_on);
+            const info = dailyCondition(item);
             const isTodayForecast = item.source === 'open_meteo_today_forecast';
             const isRecentModel = item.source === 'open_meteo_recent_model';
             const detailLabel = isTodayForecast ? ' · prakiraan hari ini' : isRecentModel ? ' ' : '';
@@ -1246,29 +1665,53 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
         refresh.disabled = true;
         errorBanner.classList.remove('show');
         setViewMode(region);
-        void loadClimateForSelectedRegion(region);
+        let heroShown = Boolean(cached);
         if (cached) {
             renderRegionWeather(region, cached.data);
-            if (Date.now() - cached.savedAt > 90 * 1000) document.getElementById('live-label').textContent += ' · memperbarui';
+            dismissCerahSplash();
+            if (Date.now() - cached.savedAt > 90 * 1000) document.getElementById('live-label').textContent += ' · memeriksa pembaruan';
         } else {
-            document.getElementById('live-label').textContent = 'Memuat data cuaca…';
+            document.getElementById('live-label').textContent = 'Memuat kondisi terakhir…';
+            // Endpoint ringan: 1 query untuk cuaca terakhir. Jangan tunggu data iklim/peta.
+            try {
+                const quick = await fetchWithLoader(`${currentWeatherUrl}/${encodeURIComponent(region.code)}`, {
+                    headers:{Accept:'application/json'}, cache:'no-store', signal:controller.signal
+                });
+                if (quick.ok) {
+                    const data = await quick.json();
+                    if (!isLatest()) return;
+                    if (data.cuaca_saat_ini) {
+                        renderHero(data);
+                        heroShown = true;
+                        dismissCerahSplash();
+                    }
+                }
+            } catch (error) {
+                if (error.name === 'AbortError' || !isLatest()) return;
+                // Endpoint lengkap tetap dicoba ketika endpoint ringan tidak tersedia.
+            }
         }
+        if (!isLatest()) return;
         try {
-            const response = await fetchWithLoader(`${regionsUrl}/${encodeURIComponent(region.code)}`, {headers:{Accept:'application/json'},cache:'no-store',signal:controller.signal});
+            const response = await fetchWithLoader(`${regionsUrl}/${encodeURIComponent(region.code)}`, {
+                headers:{Accept:'application/json'}, cache:'no-store', signal:controller.signal
+            });
             if (!response.ok) throw new Error(response.status === 404 ? 'Data cuaca belum tersedia untuk wilayah ini.' : 'Data cuaca belum dapat dimuat.');
             const data = await response.json();
             if (!isLatest()) return;
             weatherResponseCache.set(region.code, {data, savedAt:Date.now()});
             renderRegionWeather(region, data);
         } catch (error) {
-            if (!isLatest()) return;
+            if (!isLatest() || error.name === 'AbortError') return;
             errorBanner.textContent = `${error.message} Pastikan sinkronisasi pertama sudah selesai.`;
             errorBanner.classList.add('show');
-            if (!cached) document.getElementById('hero-content').innerHTML = '<div class="loading">Data cuaca belum tersedia untuk wilayah ini.</div>';
+            if (!heroShown) document.getElementById('hero-content').innerHTML = '<div class="loading">Data cuaca belum tersedia untuk wilayah ini.</div>';
         } finally {
             if (isLatest()) {
                 refresh.disabled = false;
                 dismissCerahSplash();
+                // Iklim bukan bagian dari kondisi saat ini: muat setelah cuaca utama.
+                void loadClimateForSelectedRegion(region);
             }
         }
     }
@@ -1310,18 +1753,15 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
             : climate.hari_tanpa_hujan == null
                 ? 'Belum tersedia'
                 : `${climate.hari_tanpa_hujan} hari`;
-        // Total 30 hari tidak harus beruntun. Rekor bulanan adalah statistik
-        // tambahan yang tetap menunjukkan rentetan terpanjang pada bulan ini.
-        const bulanRekorHth = new Intl.DateTimeFormat('id-ID', {
-            month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta'
-        }).format(dateParts(climate.bulan_rekor_hth ?? climate.dianalisis_sampai));
+        // HTH = total hari dengan hujan < 1 mm dalam 30 hari terakhir (tidak harus beruntun).
         const jumlahDataHth = Number(climate.hari_tercakup_30_hari ?? 0);
         const cakupanHth = jumlahDataHth < 30 ? ` · data ${jumlahDataHth}/30 hari` : '';
-        const rekorHth = climate.hari_kering_terpanjang_bulan_ini == null
-            ? 'belum ada data' : `${climate.hari_kering_terpanjang_bulan_ini} hari`;
+        const hthFmt = value => new Intl.DateTimeFormat('id-ID', {day:'numeric', month:'short', timeZone:'Asia/Jakarta'}).format(dateParts(`${value}T00:00:00+07:00`));
+        const periodeHth = climate.hth_periode_mulai && climate.hth_periode_sampai
+            ? ` (${hthFmt(climate.hth_periode_mulai)}–${hthFmt(climate.hth_periode_sampai)})` : '';
         document.getElementById('climate-dry-note').textContent = climate.wilayah_agregat
             ? `HTH dihitung per kelurahan (${climate.jumlah_kelurahan} kelurahan)`
-            : `Total hari tanpa hujan selama 30 hari terakhir${cakupanHth} · Rekor ${bulanRekorHth}: ${rekorHth} berturut-turut`;
+            : `Total hari tanpa hujan (< 1 mm) selama 30 hari terakhir${periodeHth}${cakupanHth}`;
         document.getElementById('climate-source').textContent = climate.sumber;
         document.querySelector('.climate-chart-card').hidden = Boolean(climate.wilayah_agregat);
         renderClimateChart(climate);
@@ -1491,12 +1931,24 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
             regions = await response.json();
             renderLocationPicker();
             setViewMode(currentRegion());
-            initWeatherMap();
-            void loadNews();
-            // Jangan menunggu izin lokasi untuk memuat cuaca pertama.
-            // Jika pengguna memberi izin, locateUser akan memilih wilayah yang lebih tepat.
+            // Mulai cuaca terlebih dahulu; peta BIG/berita dimuat terpisah.
             void loadWeather();
-            await locateUser();
+            initWeatherMapWhenVisible();
+            window.setTimeout(() => void loadNews(), 500);
+            // Hindari auto-refresh Open-Meteo dari request halaman: proses sinkronisasi
+            // sinkron akan memblokir php artisan serve (server PHP Windows satu request).
+            // Sinkronisasi otomatis tetap ditangani schedule:run setiap 6 jam.
+            // Pengunjung dapat memakai tombol segarkan jika perlu data yang lebih baru.
+            window.setTimeout(() => {
+                const fresh = window.__cerahFreshAt;
+                const age = fresh ? Date.now() - new Date(fresh).getTime() : NaN;
+                if (Number.isFinite(age) && age > 60 * 60 * 1000 && currentRegion()) {
+                    document.getElementById('live-label').title = 'Data lebih dari 60 menit. Klik tombol segarkan untuk mengambil data terbaru.';
+                }
+            }, 10000);
+            // Penentuan lokasi otomatis memakai koordinat wilayah terdekat.
+            // Verifikasi batas BIG yang lambat hanya saat tombol lokasi ditekan.
+            window.setTimeout(() => void locateUser({fast:true}), 2500);
         } catch (error) {
             errorBanner.textContent = `${error.message} Periksa koneksi aplikasi dan database.`;
             errorBanner.classList.add('show');
@@ -1515,7 +1967,7 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
     });
     document.addEventListener('keydown', event => { if (event.key === 'Escape') closeLocationMenu(); });
     document.getElementById('refresh-button').addEventListener('click', refreshWeatherNow);
-    document.getElementById('use-location').addEventListener('click', locateUser);
+    document.getElementById('use-location').addEventListener('click', () => locateUser());
     document.getElementById('climate-range').addEventListener('change', () => {
         const region = currentRegion();
         if (region) void loadClimateForSelectedRegion(region);
@@ -1543,8 +1995,9 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
         document.querySelectorAll('.main-nav > a.nav-link').forEach(link => link.classList.remove('active'));
         document.getElementById('nav-map').classList.add('active');
         window.requestAnimationFrame(() => {
+            if (!weatherMap && regions.length) initWeatherMap();
             weatherMap?.invalidateSize({pan:false});
-            showMapLevel(mapPath[mapPath.length - 1], true);
+            if (weatherMap) showMapLevel(mapPath[mapPath.length - 1], true);
         });
     }
     document.getElementById('nav-home').addEventListener('click', event => {
@@ -1557,7 +2010,7 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
     document.getElementById('nav-climate').addEventListener('click', event => navigateTo(event, 'climate-insights'));
     document.getElementById('nav-news').addEventListener('click', event => navigateTo(event, 'news-section'));
     document.getElementById('nav-map').addEventListener('click', showMapPage);
-    document.addEventListener('click', event => {
+    document.addEventListener('click', async event => {
         const categoryButton = event.target.closest('[data-weather-category-trigger]');
         if (categoryButton) {
             event.preventDefault();
@@ -1581,6 +2034,30 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
             const label = button.querySelector('.weather-category');
             if (label) label.hidden = true;
         });
+        const syncButton = event.target.closest('[data-sync-region-code]');
+        if (syncButton) {
+            event.preventDefault();
+            if (syncButton.disabled) return;
+            syncButton.disabled = true;
+            syncButton.textContent = 'Memuat…';
+            try {
+                const response = await fetchWithLoader(refreshUrl, {
+                    method:'POST',
+                    headers:{Accept:'application/json', 'Content-Type':'application/json', 'X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]')?.content ?? ''},
+                    body:JSON.stringify({region_code:syncButton.dataset.syncRegionCode}),
+                    cache:'no-store'
+                });
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.message || 'Data cuaca belum berhasil dimuat.');
+                await loadMapWeather();
+            } catch (error) {
+                syncButton.disabled = false;
+                syncButton.textContent = 'Coba lagi';
+                errorBanner.textContent = error.message;
+                errorBanner.classList.add('show');
+            }
+            return;
+        }
         const regionButton = event.target.closest('[data-map-region-code]');
         if (!regionButton) return;
         event.preventDefault();
