@@ -667,6 +667,7 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
     const errorBanner = document.getElementById('error-banner');
     let regions = [];
     let selectedCode = provinceCode;
+    let manualLocationSelected = false;
     let weatherRequestToken = 0;
     let weatherRequestController = null;
     let climateRequestController = null;
@@ -713,30 +714,77 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
     // Label harian ditentukan dari total curah hujan, bukan weather_code harian
     // (kode harian Open-Meteo = kondisi terburuk sepanjang hari, sehingga 1 jam gerimis
     // membuat seluruh hari berlabel hujan).
-    function dailyCondition(item) {
-        const code = item.weather_code;
-        // Label mengikuti curah hujan per jam tertinggi hari itu (puncak hujan), bila tersedia.
-        const peak = item.precipitation_max_hourly_mm == null ? null : Number(item.precipitation_max_hourly_mm);
-        if (peak !== null && Number.isFinite(peak)) {
-            const pc = (code === null || code === undefined || code === '') ? null : Number(code);
-            if (peak >= 20) return {label:'Hujan Lebat', icon:icons.rain};
-            if (peak > 5) return {label:'Hujan Sedang', icon:icons.rain};
-            if (peak >= 1) return {label:'Hujan Ringan', icon:icons.drizzle};
-            if (peak >= 0.5) return {label:'Gerimis', icon:icons.drizzle};
-            if (pc !== null && [0,1,2,3,45,48].includes(pc)) return condition(pc, 1, item.observed_on);
-            return {label:'Berawan', icon:icons.clouds};
+   
+function dailyCondition(item) {
+    const mm = item.precipitation_mm == null
+        ? null
+        : Number(item.precipitation_mm);
+
+    const code = item.weather_code == null
+        ? null
+        : Number(item.weather_code);
+
+    // Jika data curah hujan tidak tersedia,
+    // gunakan kode cuaca Open-Meteo.
+    if (mm === null || !Number.isFinite(mm)) {
+        if (code !== null && Number.isFinite(code)) {
+            return condition(code, 1, item.observed_on);
         }
-        const mm = item.precipitation_mm == null ? null : Number(item.precipitation_mm);
-        const n = (code === null || code === undefined || code === '') ? null : Number(code);
-        if (n !== null && [95,96,99].includes(n) && mm === null) return condition(n, 1, item.observed_on);
-        if (mm === null || !Number.isFinite(mm)) return n === null ? {label:'Kondisi belum tersedia', icon:icons.clouds} : condition(n, 1, item.observed_on);
-        if (mm >= 20) return {label:'Hujan Lebat', icon:icons.rain};
-        if (mm > 5) return {label:'Hujan Sedang', icon:icons.rain};
-        if (mm >= 1) return {label:'Hujan Ringan', icon:icons.drizzle};
-        // < 1 mm: hari dianggap tidak hujan (sama dengan batas Hari Tanpa Hujan); pakai kode untuk tingkat awan/kabut.
-        if (n !== null && [0,1,2,3,45,48].includes(n)) return condition(n, 1, item.observed_on);
-        return {label:'Berawan', icon:icons.clouds};
+
+        return {
+            label: 'Kondisi belum tersedia',
+            icon: icons.clouds
+        };
     }
+
+    // 0 - kurang dari 0,5 mm: Tidak hujan
+    // Kondisi mengikuti cuaca cerah atau berawan.
+    if (mm < 0.5) {
+        if (
+            code !== null &&
+            Number.isFinite(code) &&
+            [0, 1, 2, 3].includes(code)
+        ) {
+            return condition(code, 1, item.observed_on);
+        }
+
+        return {
+            label: 'Berawan',
+            icon: icons.clouds
+        };
+    }
+
+    // 0,5 - kurang dari 1 mm: Gerimis
+    if (mm < 1) {
+        return {
+            label: 'Gerimis',
+            icon: icons.drizzle
+        };
+    }
+
+    // 1 - kurang dari 10 mm: Hujan ringan
+    if (mm < 10) {
+        return {
+            label: 'Hujan Ringan',
+            icon: icons.rain
+        };
+    }
+
+    // 10 - 30 mm: Hujan sedang
+    if (mm <= 30) {
+        return {
+            label: 'Hujan Sedang',
+            icon: icons.rain
+        };
+    }
+
+    // Lebih dari 30 mm: Hujan lebat
+    return {
+        label: 'Hujan Lebat',
+        icon: icons.rain
+    };
+}
+
     function number(value, digits=0) {
         if (value === null || value === undefined || value === '') return '—';
         return new Intl.NumberFormat('id-ID', {maximumFractionDigits:digits, minimumFractionDigits:digits}).format(Number(value));
@@ -1210,6 +1258,7 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
         }
     }
     function selectRegion(code) {
+        manualLocationSelected = true;
         selectedCode = code;
         renderLocationPicker();
         closeLocationMenu();
@@ -1247,50 +1296,277 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
     }
 
     function regionByBoundaryFeature(feature, type, parentCode = null) {
-        const mapped = mapFeatureRegion(feature, type === 'district' ? 'districts' : 'villages');
-        const mappedCode = mapped.code.replace(/\D/g, '');
-        const candidates = regions.filter(region => region.type === type && (!parentCode || region.parent_code === parentCode));
-        return candidates.find(region => mappedCode && region.code.replace(/\D/g, '') === mappedCode)
-            ?? candidates.find(region => region.name.trim().toLocaleLowerCase('id') === mapped.name.trim().toLocaleLowerCase('id'))
-            ?? null;
+        const mapped = mapFeatureRegion(
+            feature,
+            type === 'district' ? 'districts' : 'villages'
+        );
+        const parentDigits = normalizeAdminCode(parentCode);
+        const candidates = regions.filter(region =>
+            region.type === type &&
+            (!parentCode || normalizeAdminCode(region.parent_code) === parentDigits)
+        );
+        const mappedCode = normalizeAdminCode(mapped.code);
+        const byCode = candidates.find(region =>
+            mappedCode && normalizeAdminCode(region.code) === mappedCode
+        );
+        if (byCode) return byCode;
+
+        const nameFields = type === 'district'
+            ? ['name', 'nama', 'wadmkc', 'namobj', 'kecamatan']
+            : ['name', 'nama', 'wadmkd', 'namobj', 'kelurahan', 'desa', 'nmdesa'];
+        const names = [mapped.name, ...nameFields.map(field => featureProperty(feature, field))]
+            .map(normalizeAdminName)
+            .filter(Boolean);
+        return candidates.find(region =>
+            names.includes(normalizeAdminName(region.name))
+        ) ?? null;
+    }
+
+    function normalizeAdminName(value) {
+        return String(value ?? '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLocaleLowerCase('id')
+            .replace(/^(provinsi|kabupaten|kota|kecamatan|kelurahan|desa)\s+/i, '')
+            .replace(/[^\p{L}\p{N}]+/gu, ' ')
+            .trim();
+    }
+
+    // UJI COBA: cocokkan nama kelurahan dari reverse geocoding dengan
+    // database CERAH; tidak memilih berdasarkan pusat koordinat terdekat.
+    // Endpoint proxy Laravel mengatur cache/rate limit dan mengirim koordinat
+    // yang dibulatkan kepada OpenStreetMap/Nominatim.
+    async function findVillageByReverseGeocoding(latitude, longitude) {
+        const controller = new AbortController();
+        const abortTimer = window.setTimeout(() => controller.abort(), 7500);
+        try {
+            const params = new URLSearchParams({
+                lat: String(latitude),
+                lon: String(longitude)
+            });
+            const response = await fetch(`/api/weather/location/reverse?${params}`, {
+                headers: {Accept: 'application/json'},
+                signal: controller.signal,
+                cache: 'no-store'
+            });
+            if (!response.ok) {
+                console.warn('[CERAH] Reverse geocoding HTTP:', response.status);
+                return null;
+            }
+            const result = await response.json();
+            const address = result?.address;
+            if (!address || typeof address !== 'object') return null;
+
+            // Kolom OSM yang berpotensi memuat nama kelurahan/desa.
+            const placeFields = [
+                'village', 'suburb', 'quarter', 'neighbourhood',
+                'hamlet', 'residential', 'city_block'
+            ];
+            const placeNames = placeFields
+                .map(field => normalizeAdminName(address[field]))
+                .filter(Boolean);
+            if (!placeNames.length) return null;
+
+            const candidates = regions.filter(region =>
+                region.type === 'village' &&
+                placeNames.includes(normalizeAdminName(region.name))
+            );
+            if (!candidates.length) return null;
+
+            // Bila OSM memberi nama kecamatan/kota yang bisa dikenali,
+            // cocokkan pula parent-nya agar nama desa kembar tidak salah.
+            const districtNames = [
+                address.city_district, address.district, address.subdistrict,
+                address.borough
+            ].map(normalizeAdminName).filter(Boolean);
+            const municipalityNames = [
+                address.city, address.town, address.municipality,
+                address.county
+            ].map(normalizeAdminName).filter(Boolean);
+
+            const allDistrictNames = regions
+                .filter(region => region.type === 'district')
+                .map(region => normalizeAdminName(region.name));
+            const allMunicipalityNames = regions
+                .filter(region => ['city', 'regency'].includes(region.type))
+                .map(region => normalizeAdminName(region.name));
+
+            // Abaikan kategori alamat yang bukan nama kecamatan/kota.
+            const knownDistricts = districtNames.filter(name =>
+                allDistrictNames.includes(name)
+            );
+            const knownMunicipalities = municipalityNames.filter(name =>
+                allMunicipalityNames.includes(name)
+            );
+
+            const validated = candidates.filter(village => {
+                const district = regions.find(item =>
+                    item.type === 'district' &&
+                    normalizeAdminCode(item.code) ===
+                        normalizeAdminCode(village.parent_code)
+                );
+                if (!district) return false;
+                const municipality = regions.find(item =>
+                    ['city', 'regency'].includes(item.type) &&
+                    normalizeAdminCode(item.code) ===
+                        normalizeAdminCode(district.parent_code)
+                );
+                if (knownDistricts.length &&
+                    !knownDistricts.includes(normalizeAdminName(district.name))) {
+                    return false;
+                }
+                if (knownMunicipalities.length &&
+                    !knownMunicipalities.includes(normalizeAdminName(municipality?.name))) {
+                    return false;
+                }
+                return true;
+            });
+
+            // Ambigu atau nama tidak cocok: jangan memilih kelurahan.
+            if (validated.length !== 1) return null;
+
+            const match = validated[0];
+            const district = regions.find(item =>
+                item.type === 'district' && item.code === match.parent_code
+            );
+            return {
+                ...match,
+                _locationMatchMethod: 'reverse_geocoding',
+                _matchedDistrict: district?.name ?? 'tidak diketahui',
+                _source: 'OpenStreetMap/Nominatim'
+            };
+        } catch (error) {
+            console.warn('[CERAH] Reverse geocoding belum tersedia:', error?.message ?? error);
+            return null;
+        } finally {
+            window.clearTimeout(abortTimer);
+        }
+    }
+
+    function normalizeAdminCode(value) {
+        return String(value ?? '').replace(/\D/g, '');
+    }
+
+    function hasRegionCoordinates(region) {
+        return Number.isFinite(Number(region?.latitude))
+            && Number.isFinite(Number(region?.longitude))
+            && Number(region.latitude) !== 0
+            && Number(region.longitude) !== 0;
+    }
+
+    function nearestRegionToPoint(latitude, longitude, candidates) {
+        return candidates
+            .filter(hasRegionCoordinates)
+            .map(region => ({
+                region,
+                distance: distanceKm(
+                    latitude,
+                    longitude,
+                    Number(region.latitude),
+                    Number(region.longitude)
+                )
+            }))
+            .sort((a, b) => a.distance - b.distance)[0] ?? null;
+    }
+
+    // Jarak terpendek dari GPS ke tepi poligon dalam meter (pendekatan lokal).
+    // Digunakan untuk menghindari penetapan kelurahan bila radius akurasi GPS
+    // masih melintasi batas kelurahan lain.
+    function pointToRingEdgeMeters(latitude, longitude, ring) {
+        if (!Array.isArray(ring) || ring.length < 2) return Infinity;
+        const toRad = Math.PI / 180;
+        const latScale = 111320;
+        const lonScale = 111320 * Math.cos(latitude * toRad);
+        let shortest = Infinity;
+        for (let i = 0; i < ring.length; i++) {
+            const a = ring[i];
+            const b = ring[(i + 1) % ring.length];
+            if (!Array.isArray(a) || !Array.isArray(b)) continue;
+            const ax = (Number(a[0]) - longitude) * lonScale;
+            const ay = (Number(a[1]) - latitude) * latScale;
+            const bx = (Number(b[0]) - longitude) * lonScale;
+            const by = (Number(b[1]) - latitude) * latScale;
+            if (![ax, ay, bx, by].every(Number.isFinite)) continue;
+            const dx = bx - ax;
+            const dy = by - ay;
+            const lengthSquared = dx * dx + dy * dy;
+            const t = lengthSquared > 0
+                ? Math.max(0, Math.min(1, -(ax * dx + ay * dy) / lengthSquared))
+                : 0;
+            shortest = Math.min(shortest, Math.hypot(ax + t * dx, ay + t * dy));
+        }
+        return shortest;
+    }
+
+    function polygonEdgeDistanceMeters(latitude, longitude, geometry) {
+        if (!geometry) return NaN;
+        const polygons = geometry.type === 'Polygon'
+            ? [geometry.coordinates]
+            : geometry.type === 'MultiPolygon'
+                ? geometry.coordinates
+                : [];
+        const relevantPolygons = polygons.filter(polygon =>
+            pointInGeometry(latitude, longitude, {type:'Polygon', coordinates:polygon})
+        );
+        const distances = relevantPolygons.flatMap(polygon =>
+            polygon.map(ring => pointToRingEdgeMeters(latitude, longitude, ring))
+        );
+        return distances.length ? Math.min(...distances) : NaN;
     }
 
     async function findVillageByBoundaries(latitude, longitude) {
         const municipalities = regions
-            .filter(region => ['city', 'regency'].includes(region.type))
-            .map(region => ({region, distance:distanceKm(latitude, longitude, Number(region.latitude), Number(region.longitude))}))
+            .filter(region => ['city', 'regency'].includes(region.type) && hasRegionCoordinates(region))
+            .map(region => ({region, distance:distanceKm(
+                latitude, longitude, Number(region.latitude), Number(region.longitude)
+            )}))
             .sort((a, b) => a.distance - b.distance);
 
+        // Untuk pulau-pulau Kepri, 4 kabupaten/kota terdekat diperiksa lebih dulu.
+        // Tidak ada pemilihan kecamatan atau kelurahan berdasarkan centroid.
         for (const {region:municipality} of municipalities) {
-            let districtFeatures;
+            let districts;
             try {
                 const data = await getBoundaryFeatures('districts', municipality.code);
-                districtFeatures = data.features.filter(feature => pointInGeometry(latitude, longitude, feature.geometry));
+                districts = (data?.features ?? [])
+                    .filter(feature => pointInGeometry(latitude, longitude, feature.geometry));
             } catch (error) {
+                console.warn(`Batas kecamatan ${municipality.name} tidak tersedia:`, error);
                 continue;
             }
-            if (!districtFeatures.length) continue;
+            for (const districtFeature of districts) {
+                const district = regionByBoundaryFeature(
+                    districtFeature, 'district', municipality.code
+                );
+                if (!district) continue;
 
-            const district = districtFeatures
-                .map(feature => ({feature, region:regionByBoundaryFeature(feature, 'district', municipality.code)}))
-                .find(item => item.region);
-            if (!district) continue;
-
-            try {
-                const villageData = await getBoundaryFeatures('villages', district.region.code);
-                const matches = villageData.features
-                    .filter(feature => pointInGeometry(latitude, longitude, feature.geometry))
-                    .map(feature => regionByBoundaryFeature(feature, 'village', district.region.code))
-                    .filter(Boolean);
-                if (matches.length) {
-                    return matches.sort((a, b) => distanceKm(latitude, longitude, Number(a.latitude), Number(a.longitude))
-                        - distanceKm(latitude, longitude, Number(b.latitude), Number(b.longitude)))[0];
+                let villages;
+                try {
+                    const data = await getBoundaryFeatures('villages', district.code);
+                    villages = (data?.features ?? [])
+                        .filter(feature => pointInGeometry(latitude, longitude, feature.geometry));
+                } catch (error) {
+                    console.warn(`Batas kelurahan ${district.name} tidak tersedia:`, error);
+                    continue;
                 }
-            } catch (error) {
-                // Continue to the nearest-centroid fallback if BIG is unavailable.
+                for (const villageFeature of villages) {
+                    const village = regionByBoundaryFeature(
+                        villageFeature, 'village', district.code
+                    );
+                    if (!village) continue;
+                    const margin = polygonEdgeDistanceMeters(
+                        latitude, longitude, villageFeature.geometry
+                    );
+                    return {
+                        ...village,
+                        _locationMatchMethod: 'polygon',
+                        _matchedDistrict: district.name,
+                        _matchedMunicipality: municipality.name,
+                        _boundaryMarginMeters: margin
+                    };
+                }
             }
         }
-
         return null;
     }
 
@@ -1300,75 +1576,121 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
         status.hidden = !message;
     }
 
-    function locateUser({fast = false} = {}) {
+    function locateUser({automatic = false} = {}) {
+        // Tidak mengganti wilayah yang dipilih manual sebelum GPS selesai.
+        if (automatic && manualLocationSelected) return Promise.resolve(false);
         const button = document.getElementById('use-location');
+        const restoreButton = (label = '⌖ Gunakan lokasi saya') => {
+            button.disabled = false;
+            button.textContent = label;
+        };
         button.disabled = true;
         button.textContent = 'Mencari lokasi…';
-        geoStatus('Meminta izin lokasi untuk menentukan kelurahan terdekat.');
+        geoStatus('Memeriksa koordinat GPS dan batas kelurahan.');
 
         if (!navigator.geolocation) {
-            geoStatus('Browser ini tidak mendukung lokasi otomatis. Pilih kelurahan secara manual.');
-            button.disabled = false;
-            button.textContent = '⌖ Gunakan lokasi saya';
+            geoStatus('Browser tidak mendukung GPS. Silakan pilih wilayah secara manual.');
+            restoreButton();
             return Promise.resolve(false);
         }
-
-        return new Promise(resolve => navigator.geolocation.getCurrentPosition(async position => {
-            const {latitude, longitude} = position.coords;
-            const province = regions.find(region => region.code === provinceCode);
-            const villages = regions.filter(region => region.type === 'village');
-            const nearest = villages
-                .map(region => ({region, distance:distanceKm(latitude, longitude, Number(region.latitude), Number(region.longitude))}))
-                .sort((a, b) => a.distance - b.distance)[0];
-            const coords = villages.map(region => ({lat:Number(region.latitude),lon:Number(region.longitude)}));
-            const insideKepriExtent = coords.length > 0
-                && latitude >= Math.min(...coords.map(point => point.lat)) - .25
-                && latitude <= Math.max(...coords.map(point => point.lat)) + .25
-                && longitude >= Math.min(...coords.map(point => point.lon)) - .25
-                && longitude <= Math.max(...coords.map(point => point.lon)) + .25;
-
-            if (!province || !nearest || !insideKepriExtent || nearest.distance > 100) {
-                selectedCode = provinceCode;
-                renderLocationPicker();
-                geoStatus('Lokasimu di luar cakupan Kepulauan Riau. Prakiraan provinsi ditampilkan.');
-                button.disabled = false;
-                button.textContent = '⌖ Gunakan lokasi saya';
-                loadWeather();
-                resolve(false);
-                return;
-            }
-
-            let locationMatch = null;
-            if (!fast) {
+        return new Promise(resolve => {
+            navigator.geolocation.getCurrentPosition(async position => {
                 try {
-                    locationMatch = await findVillageByBoundaries(latitude, longitude);
+                    const {latitude, longitude, accuracy} = position.coords;
+                    if (![latitude, longitude, accuracy].every(Number.isFinite)
+                        || accuracy < 0 || latitude < -90 || latitude > 90
+                        || longitude < -180 || longitude > 180) {
+                        geoStatus('Koordinat lokasi tidak valid. Silakan coba lagi.');
+                        restoreButton();
+                        resolve(false);
+                        return;
+                    }
+
+                    console.info('[CERAH] Hasil GPS:', {
+                        accuracyMeters: Math.round(accuracy),
+                        // Koordinat sengaja tidak dicatat ke konsol.
+                        source: 'browser-geolocation'
+                    });
+
+                    // Geolokasi berbasis Wi-Fi/IP di komputer bisa meleset jauh.
+                    // Jangan memberi label kelurahan pada posisi yang tak presisi.
+                    if (accuracy > 750) {
+                        geoStatus(
+                            `Perangkat hanya memberikan akurasi lokasi sekitar ±${Math.round(accuracy)} meter. ` +
+                            'CERAH tidak menetapkan kelurahan agar tidak salah. ' +
+                            'Aktifkan layanan lokasi perangkat atau gunakan GPS ponsel.'
+                        );
+                        restoreButton('⌖ Coba deteksi ulang');
+                        resolve(false);
+                        return;
+                    }
+
+                    // Coba nama administrasi dari OSM lebih dulu;
+                    // jika tidak tersedia, gunakan verifikasi poligon BIG.
+                    let locationMatch = await findVillageByReverseGeocoding(latitude, longitude);
+                    if (!locationMatch) {
+                        locationMatch = await findVillageByBoundaries(latitude, longitude);
+                    }
+                    if (automatic && manualLocationSelected) {
+                        restoreButton();
+                        resolve(false);
+                        return;
+                    }
+                    if (!locationMatch) {
+                        geoStatus(
+                            `GPS akurasi ±${Math.round(accuracy)} meter diterima, ` +
+                            'tetapi nama dari reverse geocoding dan poligon BIG belum dapat ' +
+                            'mencocokkan kelurahan. Pilih wilayah manual atau coba lagi.'
+                        );
+                        restoreButton('⌖ Coba deteksi ulang');
+                        resolve(false);
+                        return;
+                    }
+                    const fromReverse =
+                        locationMatch._locationMatchMethod === 'reverse_geocoding';
+                    if (!fromReverse) {
+                        const margin = Number(locationMatch._boundaryMarginMeters);
+                        if (!Number.isFinite(margin) || margin <= accuracy + 25) {
+                            geoStatus(
+                                `GPS mengarah ke ${locationMatch.name}, tetapi akurasi ±${Math.round(accuracy)} meter ` +
+                                'berpotensi melewati batas kelurahan. Pilih wilayah manual atau coba dari ponsel.'
+                            );
+                            restoreButton('⌖ Coba deteksi ulang');
+                            resolve(false);
+                            return;
+                        }
+                    }
+
+                    selectedCode = locationMatch.code;
+                    renderLocationPicker();
+                    geoStatus(fromReverse
+                        ? `Perkiraan lokasi: ${locationMatch.name}, Kecamatan ${locationMatch._matchedDistrict} ` +
+                          `(GPS ±${Math.round(accuracy)} m; nama berdasarkan OpenStreetMap, belum diverifikasi dengan poligon BIG). ` +
+                          'Jika tidak sesuai, pilih kelurahan manual.'
+                        : `Terdeteksi melalui poligon batas wilayah: ${locationMatch.name}, ` +
+                          `Kecamatan ${locationMatch._matchedDistrict} ` +
+                          `(akurasi GPS ±${Math.round(accuracy)} meter).`
+                    );
+                    restoreButton('⌖ Perbarui lokasi saya');
+                    void loadWeather();
+                    resolve(true);
                 } catch (error) {
-                    // Gunakan titik terdekat bila layanan BIG tidak tersedia.
+                    console.warn('[CERAH] Verifikasi GPS gagal:', error);
+                    geoStatus('Gagal memverifikasi batas kelurahan. Pilih wilayah manual atau coba deteksi ulang.');
+                    restoreButton('⌖ Coba deteksi ulang');
+                    resolve(false);
                 }
-            }
-            const selectedVillage = locationMatch ?? nearest.region;
-            selectedCode = selectedVillage.code;
-            renderLocationPicker();
-            const accuracy = Number(position.coords.accuracy);
-            geoStatus(locationMatch
-                ? (accuracy > 1500 ? `Lokasi ditemukan di ${selectedVillage.name}; akurasi perangkat sekitar ±${number(accuracy)} m.` : '')
-                : `Batas kelurahan belum dapat dicocokkan. Menampilkan wilayah terdekat dari titik koordinat: ${selectedVillage.name}.`);
-            button.disabled = false;
-            button.textContent = '⌖ Perbarui lokasi saya';
-            loadWeather();
-            resolve(true);
-        }, error => {
-            const message = error.code === 1
-                ? 'Izin lokasi belum diberikan. Kamu tetap bisa memilih kelurahan secara manual.'
-                : error.code === 2
-                    ? 'Lokasi perangkat belum tersedia. Coba lagi atau pilih kelurahan secara manual.'
-                    : 'Pencarian lokasi terlalu lama. Coba lagi atau pilih kelurahan secara manual.';
-            geoStatus(message);
-            button.disabled = false;
-            button.textContent = '⌖ Gunakan lokasi saya';
-            loadWeather();
-            resolve(false);
-        }, {enableHighAccuracy:true, timeout:20000, maximumAge:30000}));
+            }, error => {
+                const message = error.code === 1
+                    ? 'Izin lokasi browser tidak diberikan.'
+                    : error.code === 2
+                        ? 'Lokasi perangkat tidak tersedia.'
+                        : 'Pencarian lokasi terlalu lama.';
+                geoStatus(`${message} Silakan coba lagi atau pilih kelurahan manual.`);
+                restoreButton('⌖ Coba deteksi ulang');
+                resolve(false);
+            }, {enableHighAccuracy:true, timeout:20000, maximumAge:0});
+        });
     }
 
     // Tanggal kalender tidak boleh mengikuti timestamp data cuaca yang mungkin terlambat.
@@ -1571,28 +1893,85 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
         return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]}</svg>`;
     }
 
-    function renderDays(history) {
-        if (!history?.length) { document.getElementById('days-grid').innerHTML = '<tr><td colspan="4" class="empty">Riwayat cuaca belum tersedia. Jalankan sinkronisasi data historis terlebih dahulu.</td></tr>'; return; }
-        const orderedHistory = [...history].sort((a, b) => String(b.observed_on ?? '').localeCompare(String(a.observed_on ?? '')));
-        document.getElementById('days-grid').innerHTML = orderedHistory.map(item => {
-            const date = dateParts(item.observed_on);
-            const dateLabel = new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',weekday:'short',day:'numeric',month:'short'}).format(date);
-            const info = dailyCondition(item);
-            const isTodayForecast = item.source === 'open_meteo_today_forecast';
-            const isRecentModel = item.source === 'open_meteo_recent_model';
-            const detailLabel = isTodayForecast ? ' · prakiraan hari ini' : isRecentModel ? ' ' : '';
-            const max = item.temperature_max_c == null ? '—' : number(item.temperature_max_c);
-            const min = item.temperature_min_c == null ? '—' : number(item.temperature_min_c);
-            const temperatureText = item.temperature_max_c != null && item.temperature_min_c != null
-                ? `${max}–${min}`
-                : item.temperature_max_c != null ? `Maks ${max}` : item.temperature_min_c != null ? `Min ${min}` : '—';
-            const rain = item.precipitation_mm == null ? '—' : number(item.precipitation_mm,1);
-            return `<tr><td>${dateLabel}</td><td><div class="history-weather"><span class="history-weather-icon">${info.icon}</span><span class="history-weather-label">${escapeHtml(info.label + detailLabel)}</span></div></td><td>${temperatureText}</td><td>${rain}</td></tr>`;
-        }).join('');
-        // Always show newest available date when reloading/changing a region.
-        const historyScroll = document.querySelector('.history-table-scroll');
-        if (historyScroll) historyScroll.scrollTop = 0;
+   
+function renderDays(history) {
+    if (!history?.length) {
+        document.getElementById('days-grid').innerHTML =
+            '<tr><td colspan="4" class="empty">Riwayat cuaca belum tersedia. Jalankan sinkronisasi data historis terlebih dahulu.</td></tr>';
+        return;
     }
+
+    const orderedHistory = [...history].sort((a, b) =>
+        String(b.observed_on ?? '').localeCompare(String(a.observed_on ?? ''))
+    );
+
+    // Menggunakan tanggal hari ini berdasarkan WIB
+    const todayKey = dayKeyWib(new Date());
+
+    document.getElementById('days-grid').innerHTML =
+        orderedHistory.map(item => {
+            const date = dateParts(item.observed_on);
+
+            const dateLabel = new Intl.DateTimeFormat('id-ID', {
+                timeZone: 'Asia/Jakarta',
+                weekday: 'short',
+                day: 'numeric',
+                month: 'short'
+            }).format(date);
+
+            const info = dailyCondition(item);
+
+            // Label hanya muncul pada tanggal hari ini
+            const observedDateKey = String(item.observed_on ?? '').slice(0, 10);
+
+            const isTodayForecast =
+                item.source === 'open_meteo_today_forecast' &&
+                observedDateKey === todayKey;
+
+            const isRecentModel =
+                item.source === 'open_meteo_recent_model';
+
+            const detailLabel = isTodayForecast
+                ? ' · prakiraan hari ini'
+                : isRecentModel ? ' ' : '';
+
+            const max = item.temperature_max_c == null
+                ? '—' : number(item.temperature_max_c);
+
+            const min = item.temperature_min_c == null
+                ? '—' : number(item.temperature_min_c);
+
+            const temperatureText =
+                item.temperature_max_c != null &&
+                item.temperature_min_c != null
+                    ? `${max}–${min}`
+                    : item.temperature_max_c != null
+                        ? `Maks ${max}`
+                        : item.temperature_min_c != null
+                            ? `Min ${min}` : '—';
+
+            const rain = item.precipitation_mm == null
+                ? '—' : number(item.precipitation_mm, 1);
+
+            return `<tr>
+                <td>${dateLabel}</td>
+                <td>
+                    <div class="history-weather">
+                        <span class="history-weather-icon">${info.icon}</span>
+                        <span class="history-weather-label">${escapeHtml(info.label + detailLabel)}</span>
+                    </div>
+                </td>
+                <td>${temperatureText}</td>
+                <td>${rain}</td>
+            </tr>`;
+        }).join('');
+
+    const historyScroll = document.querySelector('.history-table-scroll');
+
+    if (historyScroll) {
+        historyScroll.scrollTop = 0;
+    }
+}
 
     function renderHours(forecast) {
         const now = Date.now();
@@ -1946,9 +2325,9 @@ window.setTimeout(() => document.getElementById('cerah-splash')?.classList.add('
                     document.getElementById('live-label').title = 'Data lebih dari 60 menit. Klik tombol segarkan untuk mengambil data terbaru.';
                 }
             }, 10000);
-            // Penentuan lokasi otomatis memakai koordinat wilayah terdekat.
-            // Verifikasi batas BIG yang lambat hanya saat tombol lokasi ditekan.
-            window.setTimeout(() => void locateUser({fast:true}), 2500);
+            // Hanya pilih lokasi otomatis jika GPS dan poligon sama-sama meyakinkan.
+            // Jika batas tidak tersedia, jangan menebak titik pusat terdekat.
+            window.setTimeout(() => void locateUser({automatic:true}), 2500);
         } catch (error) {
             errorBanner.textContent = `${error.message} Periksa koneksi aplikasi dan database.`;
             errorBanner.classList.add('show');

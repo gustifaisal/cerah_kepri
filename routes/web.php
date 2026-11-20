@@ -353,3 +353,4 @@ Route::post('/api/weather/refresh', function (\Illuminate\Http\Request $request)
             : ($commandOutput !== '' ? $commandOutput : 'Pembaruan gagal. Data sebelumnya tetap ditampilkan.'),
     ], $exitCode === 0 ? 200 : 502);
 })->middleware('throttle:3,1');
+\Illuminate\Support\Facades\Route::get('/api/weather/location/reverse', [\App\Http\Controllers\CerahReverseGeocodeController::class, 'show'])->middleware('throttle:20,1');
